@@ -50,6 +50,9 @@
         })
       : guide?.build || []
   );
+
+  let heroWr = $derived(guide?.hero ? engine.getHeroWinrate(guide.hero.hero_name) : null);
+  const metaSync = engine.getWinrateMetadata();
 </script>
 
 {#if guide}
@@ -105,6 +108,35 @@
         {/if}
       </div>
     </div>
+
+    <!-- CURRENT META STATS STRIP -->
+    {#if heroWr}
+      <div class="meta-dossier-strip">
+        <div class="meta-strip-item tier-item">
+          <span class="meta-label">META TIER</span>
+          <span class="meta-val tier-badge tier-{heroWr.tier?.toLowerCase()}">{heroWr.tier} TIER</span>
+        </div>
+        <div class="meta-strip-item">
+          <span class="meta-label">WINRATE</span>
+          <span class="meta-val wr-val">{heroWr.winrate}</span>
+        </div>
+        <div class="meta-strip-item">
+          <span class="meta-label">BANRATE</span>
+          <span class="meta-val ban-val">{heroWr.banrate}</span>
+        </div>
+        <div class="meta-strip-item">
+          <span class="meta-label">PICKRATE</span>
+          <span class="meta-val pick-val">{heroWr.pickrate}</span>
+        </div>
+        <div class="meta-strip-item meta-timestamp-item">
+          <span class="meta-label">MOONTON RANK DATA</span>
+          <span class="meta-timestamp-val">
+            <span class="meta-pulse-dot"></span>
+            Update Terakhir: {metaSync.last_updated} ({metaSync.rank_scope})
+          </span>
+        </div>
+      </div>
+    {/if}
 
     <!-- SPELL & EMBLEM SPLIT CONSOLE -->
     <div class="console-subgrid">
@@ -565,6 +597,117 @@
   .hero-select-box option {
     background: #0b101c;
     color: #e2e8f0;
+  }
+
+  /* CURRENT META STATS STRIP */
+  .meta-dossier-strip {
+    display: grid;
+    grid-template-columns: auto repeat(3, 1fr) 2fr;
+    gap: 0.75rem;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--border-tech);
+    border-radius: var(--radius-xs);
+    padding: 0.65rem 1rem;
+    margin-bottom: 1.25rem;
+  }
+
+  @media (max-width: 768px) {
+    .meta-dossier-strip {
+      grid-template-columns: 1fr 1fr;
+    }
+    .meta-timestamp-item {
+      grid-column: 1 / -1;
+    }
+  }
+
+  .meta-strip-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .meta-label {
+    font-family: var(--font-mono);
+    font-size: 0.58rem;
+    font-weight: 700;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+  }
+
+  .meta-val {
+    font-family: var(--font-mono);
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+
+  .tier-badge {
+    font-size: 0.72rem;
+    padding: 2px 8px;
+    border-radius: var(--radius-xs);
+    font-family: var(--font-mono);
+    font-weight: 700;
+    width: fit-content;
+  }
+
+  .tier-badge.tier-s\+ {
+    background: rgba(234, 179, 8, 0.2);
+    color: #facc15;
+    border: 1px solid rgba(250, 204, 21, 0.5);
+    box-shadow: 0 0 10px rgba(250, 204, 21, 0.2);
+  }
+
+  .tier-badge.tier-s {
+    background: rgba(34, 197, 94, 0.2);
+    color: #4ade80;
+    border: 1px solid rgba(74, 222, 128, 0.4);
+  }
+
+  .tier-badge.tier-a {
+    background: rgba(56, 189, 248, 0.15);
+    color: #38bdf8;
+    border: 1px solid rgba(56, 189, 248, 0.3);
+  }
+
+  .tier-badge.tier-b {
+    background: rgba(148, 163, 184, 0.1);
+    color: #94a3b8;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+  }
+
+  .wr-val {
+    color: #4ade80;
+  }
+
+  .ban-val {
+    color: #fb7185;
+  }
+
+  .pick-val {
+    color: #38bdf8;
+  }
+
+  .meta-timestamp-item {
+    align-items: flex-end;
+  }
+
+  .meta-timestamp-val {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: var(--gold-mythic);
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-weight: 600;
+  }
+
+  .meta-pulse-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #4ade80;
+    box-shadow: 0 0 8px #4ade80;
   }
 
   .console-subgrid {

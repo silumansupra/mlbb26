@@ -4,6 +4,25 @@ import emblemsData from '../data/emblems.json';
 import talentsData from '../data/talents.json';
 import spellsData from '../data/spells.json';
 import heroBuildsData from '../data/heroBuilds.json';
+import winrateData from '../data/winrate.json';
+
+export function getWinrateMetadata() {
+  return winrateData?.metadata || {
+    last_updated: '07 Nov 2026, 00:00 WIB',
+    source: 'https://m.mobilelegends.com/rank',
+    rank_scope: 'All Rank (Past 1 Day)'
+  };
+}
+
+export function getHeroWinrate(heroName) {
+  if (!heroName) return null;
+  const clean = heroName.toLowerCase().replace(/[^a-z0-9]/g, '');
+  return winrateData?.heroes?.[clean] || null;
+}
+
+export function getAllWinrates() {
+  return winrateData?.heroes || {};
+}
 
 // Archetype Tags for deeper contextual countering
 export const HERO_TRAITS = {
@@ -178,6 +197,23 @@ export function getHeroBuild(heroName) {
 export function analyzeEnemyThreats(enemyHeroes) {
   if (!enemyHeroes || enemyHeroes.length === 0) return [];
   const threats = [];
+
+  // 0. High Meta Threat Detection (Power picks / High WR / High Banrate)
+  const metaThreatHeroes = enemyHeroes.map(h => {
+    const wr = getHeroWinrate(h.hero_name);
+    return wr ? { hero: h, wr } : null;
+  }).filter(x => x && (x.wr.winrate_num >= 55.0 || x.wr.banrate_num >= 20.0 || x.wr.tier === 'S+'));
+
+  if (metaThreatHeroes.length > 0) {
+    threats.push({
+      id: 'meta_threat',
+      level: 'CRITICAL',
+      title: 'High Meta & Power Pick Alert',
+      heroes: metaThreatHeroes.map(t => `${t.hero.hero_name} (WR ${t.wr.winrate}, Ban ${t.wr.banrate})`),
+      advice: 'Musuh mengamankan hero meta/power-pick dengan winrate atau banrate tinggi di patch ini. Disiplin positioning, batasi ruang farming mereka, dan amankan item counter utama.',
+      recommendedItems: ['Dominance Ice', 'Sea Halberd', "Athena's Shield", 'Antique Cuirass']
+    });
+  }
 
   const checkCount = (tag) => {
     return enemyHeroes.filter(h => HERO_TRAITS[tag]?.includes(h.hero_name));
@@ -390,11 +426,32 @@ export function calculateCounterRecommendations(enemyHeroes, myHeroes = []) {
       }
     });
 
+    // 6. Meta Winrate & Tier Weighting
+    const wr = getHeroWinrate(candidate.hero_name);
+    if (wr) {
+      // Score bonus: +2.5 per 1% above 50% WR, or penalty if below 50%
+      const wrDelta = Math.round((wr.winrate_num - 50) * 2.5);
+      score += wrDelta;
+
+      if (wr.tier === 'S+') {
+        score += 12;
+        reasons.push(`Meta Tier S+ (${wr.winrate} WR, ${wr.banrate} Ban)`);
+      } else if (wr.tier === 'S' && wr.winrate_num >= 53.5) {
+        score += 6;
+        reasons.push(`Meta Tier S (${wr.winrate} WR)`);
+      }
+    }
+
     if (score > 10) {
       recommendations.push({
         hero: candidate,
         score,
         lane: normalizeLane(candidate),
+        winrate: wr ? wr.winrate : null,
+        winrate_num: wr ? wr.winrate_num : null,
+        banrate: wr ? wr.banrate : null,
+        pickrate: wr ? wr.pickrate : null,
+        tier: wr ? wr.tier : null,
         reasons: Array.from(new Set(reasons)).slice(0, 3)
       });
     }
