@@ -4,83 +4,95 @@
     "name": "Flicker",
     "cd": "120s",
     "description": "Teleports a short distance in the target direction.",
-    "best_against": "General positioning / surprise attack / escape"
+    "best_against": "General positioning / surprise attack / escape",
+    "icon": "/spells/flicker.png"
   },
   {
     "id": "purify",
     "name": "Purify",
     "cd": "90s",
     "description": "Immediately removes all CC effects, grants CC immunity and +15% Movement Speed for 1.2s.",
-    "best_against": "Heavy CC chains (Tigreal, Atlas, Badang, Guinevere, Chou, Franco)"
+    "best_against": "Heavy CC chains (Tigreal, Atlas, Badang, Guinevere, Chou, Franco)",
+    "icon": "/spells/purify.png"
   },
   {
     "id": "retribution",
     "name": "Retribution",
     "cd": "35s",
     "description": "Mandatory spell for Jungler. Deals true damage to creeps and objectives.",
-    "best_against": "Jungler role / Turtle & Lord control"
+    "best_against": "Jungler role / Turtle & Lord control",
+    "icon": "/spells/flame retribution.png"
   },
   {
     "id": "inspire",
     "name": "Inspire",
     "cd": "60s",
     "description": "Significantly enhances basic attack speed (up to 500%), ignores defense, and grants HP heal.",
-    "best_against": "High attack speed marksmen (Miya, Moskov, Wanwan)"
+    "best_against": "High attack speed marksmen (Miya, Moskov, Wanwan)",
+    "icon": "/spells/inspire.png"
   },
   {
     "id": "vengeance",
     "name": "Vengeance",
     "cd": "75s",
     "description": "Reflects 35% damage taken and grants 35% damage reduction for 3s.",
-    "best_against": "High attack speed and physical burst (Claude, Miya, Badang)"
+    "best_against": "High attack speed and physical burst (Claude, Miya, Badang)",
+    "icon": "/spells/vengeance.png"
   },
   {
     "id": "sprint",
     "name": "Sprint",
     "cd": "100s",
     "description": "Grants +50% movement speed and slow immunity for 6s.",
-    "best_against": "Continuous slow compositions (Valir, Yve, Kimmy)"
+    "best_against": "Continuous slow compositions (Valir, Yve, Kimmy)",
+    "icon": "/spells/sprint.png"
   },
   {
     "id": "petrify",
     "name": "Petrify",
     "cd": "90s",
     "description": "Stuns nearby enemies for 0.8s and slows them by 50%.",
-    "best_against": "Close-combat burst combos (Benedetta, Yu Zhong, Kadita)"
+    "best_against": "Close-combat burst combos (Benedetta, Yu Zhong, Kadita)",
+    "icon": "/spells/petrify.png"
   },
   {
     "id": "aegis",
     "name": "Aegis",
     "cd": "90s",
     "description": "Grants a shield for 3s to self and the lowest HP nearby ally.",
-    "best_against": "Burst assassin teams"
+    "best_against": "Burst assassin teams",
+    "icon": "/spells/aegis.png"
   },
   {
     "id": "revitalize",
     "name": "Revitalize",
     "cd": "100s",
     "description": "Summons a healing spring that recovers HP over 5s.",
-    "best_against": "Sustain deathball teamfights"
+    "best_against": "Sustain deathball teamfights",
+    "icon": "/spells/revitalize.png"
   },
   {
     "id": "flameshot",
     "name": "Flameshot",
     "cd": "50s",
     "description": "Snipes enemies at long range or knocks back close attackers.",
-    "best_against": "Mage self-peel and long-range execution"
+    "best_against": "Mage self-peel and long-range execution",
+    "icon": "/spells/flameshot.png"
   },
   {
     "id": "arrival",
     "name": "Arrival",
     "cd": "75s",
     "description": "Teleports to allied turret or minion, enhancing defense.",
-    "best_against": "Split-push strategy (Zilong, Sun, Argus)"
+    "best_against": "Split-push strategy (Zilong, Sun, Argus)",
+    "icon": "/spells/arrival.png"
   },
   {
     "id": "execute",
     "name": "Execute",
     "cd": "90s",
     "description": "Deals true damage based on lost HP; CD reduced by 40% on kill.",
-    "best_against": "Early kill pressure (Hilda, Paquito, Martis)"
+    "best_against": "Early kill pressure (Hilda, Paquito, Martis)",
+    "icon": "/spells/execute.png"
   }
 ]

@@ -1,5 +1,13 @@
 <script>
-  let { guide = null, allHeroes = [], onSelectHero } = $props();
+  import * as engine from './counterEngine.js';
+
+  let {
+    guide = null,
+    allHeroes = [],
+    customLoadout = null,
+    onOpenPreparation,
+    onSelectHero
+  } = $props();
 
   function handleHeroChange(e) {
     const name = e.target.value;
@@ -8,6 +16,40 @@
       onSelectHero(hero);
     }
   }
+
+  // Determine active spell, emblem, and build items taking customLoadout into account
+  let effectiveSpellName = $derived(
+    customLoadout?.spell?.name || customLoadout?.spell?.id || guide?.battleSpell?.name || 'Flicker'
+  );
+
+  let effectiveEmblemBase = $derived(
+    customLoadout?.emblem?.base || guide?.emblem?.name || 'Common'
+  );
+
+  let effectiveTier1 = $derived(
+    customLoadout?.emblem?.tier1?.name || customLoadout?.emblem?.tier1 || guide?.emblem?.tier1 || 'Thrill'
+  );
+
+  let effectiveTier2 = $derived(
+    customLoadout?.emblem?.tier2?.name || customLoadout?.emblem?.tier2 || guide?.emblem?.tier2 || 'Master Assassin'
+  );
+
+  let effectiveTier3 = $derived(
+    customLoadout?.emblem?.tier3?.name || customLoadout?.emblem?.tier3 || guide?.emblem?.tier3 || 'Killing Spree'
+  );
+
+  let effectiveBuild = $derived(
+    customLoadout?.items?.length
+      ? customLoadout.items.map((itemName, idx) => {
+          const original = guide?.build?.find(b => b.name === itemName);
+          return {
+            name: itemName,
+            reason: original ? original.reason : 'Pilihan kustom pemain untuk hero ini.',
+            isCounter: original ? original.isCounter : false
+          };
+        })
+      : guide?.build || []
+  );
 </script>
 
 {#if guide}
@@ -22,29 +64,46 @@
           <div class="dossier-title-line">
             <h2 class="dossier-name">{guide.hero.hero_name.toUpperCase()}</h2>
             <span class="active-tag">HERO LOADOUT</span>
+            {#if customLoadout}
+              <span class="custom-badge">CUSTOM PREPARATION</span>
+            {/if}
           </div>
           <span class="dossier-class">{guide.hero.class} // {guide.playstyle || 'TACTICAL ASSET'}</span>
         </div>
       </div>
 
-      <!-- QUICK HERO SELECTOR (ALL 133 HEROES) -->
-      {#if allHeroes && allHeroes.length > 0}
-        <div class="quick-switcher">
-          <label for="hero-select-input" class="switcher-label">INSPECT ANY HERO:</label>
-          <div class="select-wrapper">
-            <select
-              id="hero-select-input"
-              class="hero-select-box"
-              value={guide?.hero?.hero_name || ''}
-              onchange={handleHeroChange}
-            >
-              {#each allHeroes as h}
-                <option value={h.hero_name}>{h.hero_name} ({h.class})</option>
-              {/each}
-            </select>
+      <!-- ACTIONS: QUICK PREPARATION TRIGGER & QUICK HERO SELECTOR -->
+      <div class="header-right-cluster">
+        {#if onOpenPreparation}
+          <button
+            type="button"
+            class="prep-modal-trigger"
+            onclick={() => onOpenPreparation(guide.hero, 'build')}
+            title="Buka Menu Persiapan In-Game Lengkap"
+          >
+            <span class="btn-ic">⚙️</span>
+            <span>CUSTOMIZE BUILD / EMBLEM</span>
+          </button>
+        {/if}
+
+        {#if allHeroes && allHeroes.length > 0}
+          <div class="quick-switcher">
+            <label for="hero-select-input" class="switcher-label">INSPECT HERO:</label>
+            <div class="select-wrapper">
+              <select
+                id="hero-select-input"
+                class="hero-select-box"
+                value={guide?.hero?.hero_name || ''}
+                onchange={handleHeroChange}
+              >
+                {#each allHeroes as h}
+                  <option value={h.hero_name}>{h.hero_name} ({h.class})</option>
+                {/each}
+              </select>
+            </div>
           </div>
-        </div>
-      {/if}
+        {/if}
+      </div>
     </div>
 
     <!-- SPELL & EMBLEM SPLIT CONSOLE -->
@@ -59,17 +118,31 @@
         <div class="spell-payload">
           <!-- Active Spell -->
           <div class="spell-banner">
-            <div class="spell-title-col">
-              <span class="spell-callsign">{guide.battleSpell.name.toUpperCase()}</span>
-              <span class="spell-status-tag">MATCHUP CHOICE</span>
+            <div class="spell-icon-box">
+              <img src={engine.getSpellIcon(effectiveSpellName)} alt={effectiveSpellName} class="panel-spell-img" />
             </div>
+            <div class="spell-title-col">
+              <span class="spell-callsign">{effectiveSpellName.toUpperCase()}</span>
+              <span class="spell-status-tag">{customLoadout?.spell ? 'CUSTOM EQUIPPED' : 'MATCHUP CHOICE'}</span>
+            </div>
+            {#if onOpenPreparation}
+              <button
+                type="button"
+                class="quick-slot-change"
+                onclick={() => onOpenPreparation(guide.hero, 'spell')}
+                title="Ganti Battle Spell"
+              >
+                GANTI
+              </button>
+            {/if}
           </div>
           <p class="spell-logic">{guide.battleSpell.reason}</p>
 
           <!-- Situational / Alternate Spell -->
-          {#if guide.allSpells && guide.allSpells.situational && guide.allSpells.situational.name !== guide.battleSpell.name}
+          {#if guide.allSpells && guide.allSpells.situational && guide.allSpells.situational.name !== effectiveSpellName}
             <div class="alt-spell-box">
               <div class="alt-spell-head">
+                <img src={engine.getSpellIcon(guide.allSpells.situational.name)} alt={guide.allSpells.situational.name} class="alt-spell-mini" />
                 <span class="alt-tag">OPSI ALTERNATIF / SITUASIONAL:</span>
                 <span class="alt-name">{guide.allSpells.situational.name} ({guide.allSpells.situational.cd || '90s'})</span>
               </div>
@@ -88,23 +161,47 @@
 
         <div class="emblem-payload">
           <div class="base-emblem-indicator">
-            <span class="base-lbl">BASE EMBLEM:</span>
-            <span class="base-val">{guide.emblem.name.toUpperCase()}</span>
+            <div class="emblem-mini-icon">
+              <img src={engine.getEmblemIcon(effectiveEmblemBase)} alt={effectiveEmblemBase} class="panel-emblem-img" />
+            </div>
+            <div class="emblem-name-col">
+              <span class="base-lbl">BASE EMBLEM:</span>
+              <span class="base-val">{effectiveEmblemBase.toUpperCase()}</span>
+            </div>
+            {#if onOpenPreparation}
+              <button
+                type="button"
+                class="quick-slot-change"
+                onclick={() => onOpenPreparation(guide.hero, 'emblem')}
+                title="Atur Emblem & Talenta"
+              >
+                ATUR
+              </button>
+            {/if}
           </div>
           <p class="emblem-rationale">{guide.emblem.rationale}</p>
 
           <div class="talent-nodes">
             <div class="node-item">
-              <span class="node-tier">T1</span>
-              <span class="node-desc">{guide.emblem.tier1}</span>
+              <img src={engine.getTalentIcon(effectiveTier1)} alt={effectiveTier1} class="node-icon-art" />
+              <div class="node-texts">
+                <span class="node-tier">T1</span>
+                <span class="node-desc">{effectiveTier1}</span>
+              </div>
             </div>
             <div class="node-item">
-              <span class="node-tier">T2</span>
-              <span class="node-desc">{guide.emblem.tier2}</span>
+              <img src={engine.getTalentIcon(effectiveTier2)} alt={effectiveTier2} class="node-icon-art" />
+              <div class="node-texts">
+                <span class="node-tier">T2</span>
+                <span class="node-desc">{effectiveTier2}</span>
+              </div>
             </div>
             <div class="node-item t3-node">
-              <span class="node-tier t3-tier">T3</span>
-              <span class="node-desc t3-desc">{guide.emblem.tier3}</span>
+              <img src={engine.getTalentIcon(effectiveTier3)} alt={effectiveTier3} class="node-icon-art" />
+              <div class="node-texts">
+                <span class="node-tier t3-tier">T3</span>
+                <span class="node-desc t3-desc">{effectiveTier3}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -118,16 +215,31 @@
           <span class="cell-tag">EQUIPMENT PROTOCOL</span>
           <h4 class="cell-title">ADAPTIVE 6-ITEM COUNTER BUILD</h4>
         </div>
-        <div class="legend-indicator">
-          <span class="legend-bracket"></span>
-          <span class="legend-text">GOLD BORDER = REACTIVE COUNTERMEASURE</span>
+        <div class="right-legend-group">
+          {#if onOpenPreparation}
+            <button
+              type="button"
+              class="quick-shop-btn"
+              onclick={() => onOpenPreparation(guide.hero, 'build')}
+              title="Buka Shop & Ganti Item"
+            >
+              SHOP & MODIFIKASI
+            </button>
+          {/if}
+          <div class="legend-indicator">
+            <span class="legend-bracket"></span>
+            <span class="legend-text">GOLD = COUNTER</span>
+          </div>
         </div>
       </div>
 
       <div class="inventory-slots">
-        {#each guide.build as item, index}
+        {#each effectiveBuild as item, index}
           <div class="slot-item" class:is-reactive={item.isCounter}>
             <div class="slot-sequence">0{index + 1}</div>
+            <div class="item-visual-box">
+              <img src={engine.getItemIcon(item.name)} alt={item.name} class="item-img-art" />
+            </div>
             <div class="slot-details">
               <div class="item-title-row">
                 <span class="item-callsign">{item.name}</span>
@@ -212,6 +324,170 @@
     display: flex;
     flex-direction: column;
     gap: 2px;
+  }
+
+  .custom-badge {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    font-weight: 800;
+    padding: 2px 7px;
+    border-radius: var(--radius-xs);
+    background: rgba(168, 85, 247, 0.25);
+    color: #c084fc;
+    border: 1px solid rgba(168, 85, 247, 0.5);
+    letter-spacing: 0.5px;
+  }
+
+  .header-right-cluster {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .prep-modal-trigger {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.45rem 0.9rem;
+    background: linear-gradient(180deg, rgba(245, 158, 11, 0.2) 0%, rgba(217, 119, 6, 0.35) 100%);
+    border: 1px solid var(--gold-mythic);
+    border-radius: var(--radius-xs);
+    color: #ffffff;
+    font-family: var(--font-display);
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    box-shadow: 0 0 12px rgba(245, 158, 11, 0.25);
+    transition: all 0.15s ease;
+  }
+
+  .prep-modal-trigger:hover {
+    background: linear-gradient(180deg, rgba(245, 158, 11, 0.35) 0%, rgba(217, 119, 6, 0.55) 100%);
+    box-shadow: 0 0 18px rgba(245, 158, 11, 0.45);
+    transform: translateY(-1px);
+  }
+
+  .btn-ic {
+    font-size: 0.9rem;
+  }
+
+  .spell-icon-box {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 1.5px solid var(--gold-mythic);
+    background: #000;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .panel-spell-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .alt-spell-mini {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .quick-slot-change {
+    margin-left: auto;
+    padding: 0.2rem 0.6rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 3px;
+    color: #cbd5e1;
+    font-size: 0.65rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.12s ease;
+  }
+
+  .quick-slot-change:hover {
+    background: var(--gold-mythic);
+    color: #000;
+    border-color: var(--gold-mythic);
+  }
+
+  .emblem-mini-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1.5px solid var(--ally-cyan);
+    background: #000;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .panel-emblem-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .emblem-name-col {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .node-icon-art {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    flex-shrink: 0;
+  }
+
+  .node-texts {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-width: 0;
+  }
+
+  .right-legend-group {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+  }
+
+  .quick-shop-btn {
+    padding: 0.25rem 0.65rem;
+    background: rgba(168, 85, 247, 0.15);
+    border: 1px solid rgba(168, 85, 247, 0.4);
+    border-radius: 3px;
+    color: #d8b4fe;
+    font-size: 0.68rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.12s ease;
+  }
+
+  .quick-shop-btn:hover {
+    background: rgba(168, 85, 247, 0.35);
+    color: #ffffff;
+  }
+
+  .item-visual-box {
+    width: 40px;
+    height: 40px;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: #000;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .item-img-art {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 
   .dossier-title-line {

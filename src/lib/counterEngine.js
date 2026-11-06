@@ -82,6 +82,89 @@ export function getAllHeroes() {
   return heroesData;
 }
 
+export function getAllItems() {
+  return itemsData;
+}
+
+export function getAllSpells() {
+  return spellsData;
+}
+
+export function getAllEmblems() {
+  return emblemsData;
+}
+
+export function getAllTalents() {
+  return talentsData;
+}
+
+export function getItemByName(name) {
+  if (!name) return null;
+  const clean = name.toLowerCase().replace(/[^a-z0-9]/g, '');
+  return itemsData.find(i => i.item_name.toLowerCase().replace(/[^a-z0-9]/g, '') === clean) || null;
+}
+
+export function getItemIcon(name) {
+  const item = getItemByName(name);
+  if (item && item.icon) return item.icon;
+  if (!name) return '/items/dagger.png';
+  const slug = name.toLowerCase().replace(/[^a-z0-9]/g, '_');
+  return `/items/${slug}.png`;
+}
+
+export function getSpellByNameOrId(nameOrId) {
+  if (!nameOrId) return null;
+  const clean = nameOrId.toLowerCase().replace(/[^a-z0-9]/g, '');
+  return spellsData.find(s => 
+    s.id.toLowerCase().replace(/[^a-z0-9]/g, '') === clean || 
+    s.name.toLowerCase().replace(/[^a-z0-9]/g, '') === clean
+  ) || null;
+}
+
+export function getSpellIcon(nameOrId) {
+  const spell = getSpellByNameOrId(nameOrId);
+  if (spell && spell.icon) return spell.icon;
+  if (!nameOrId) return '/spells/flicker.png';
+  const slug = nameOrId.toLowerCase().replace(/[^a-z0-9]/g, '-');
+  return `/spells/${slug}.png`;
+}
+
+export function getEmblemByName(name) {
+  if (!name) return null;
+  const clean = name.toLowerCase().replace(/[^a-z0-9]/g, '');
+  return emblemsData.find(e => 
+    e.emblem_name.toLowerCase().replace(/[^a-z0-9]/g, '') === clean ||
+    e.emblem_role.toLowerCase().replace(/[^a-z0-9]/g, '') === clean ||
+    ('custom' + e.emblem_role.toLowerCase()).replace(/[^a-z0-9]/g, '') === clean
+  ) || null;
+}
+
+export function getEmblemIcon(name) {
+  const emblem = getEmblemByName(name);
+  if (emblem && emblem.icon) return emblem.icon;
+  return '/emblems/basic-common.webp';
+}
+
+export function getTalentByIdOrName(key) {
+  if (!key) return null;
+  const clean = key.toLowerCase().replace(/[^a-z0-9]/g, '');
+  for (const tier of ['tier1', 'tier2', 'tier3']) {
+    const list = talentsData[tier] || [];
+    const found = list.find(t => 
+      t.id.toLowerCase().replace(/[^a-z0-9]/g, '') === clean ||
+      t.name.toLowerCase().replace(/[^a-z0-9]/g, '') === clean
+    );
+    if (found) return found;
+  }
+  return null;
+}
+
+export function getTalentIcon(key) {
+  const talent = getTalentByIdOrName(key);
+  if (talent && talent.icon) return talent.icon;
+  return '/talents/thrill.webp';
+}
+
 export function getHeroBuild(heroName) {
   if (!heroName) return null;
   return heroBuildsData[heroName.toLowerCase()] || null;

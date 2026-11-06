@@ -1,16 +1,51 @@
 <script>
+  import * as engine from './counterEngine.js';
+
   let {
     myTeam = [],
     enemyTeam = [],
     selectedSlot = null,
+    customLoadouts = {},
     onSlotClick,
     onRemoveHero,
     onLoadPreset,
-    onReset
+    onReset,
+    onOpenPreparation
   } = $props();
 
   const laneLabels = ['GOLD LANE', 'EXP LANE', 'MID LANE', 'ROAM', 'JUNGLE'];
   const laneCodes = ['GLD', 'EXP', 'MID', 'ROM', 'JGL'];
+
+  function getHeroEmblemIcon(hero) {
+    if (!hero) return '/emblems/basic-common.webp';
+    const custom = customLoadouts[hero.hero_name];
+    if (custom?.emblem?.base) {
+      return engine.getEmblemIcon(custom.emblem.base);
+    }
+    const guide = engine.getHeroBuild(hero.hero_name);
+    return engine.getEmblemIcon(guide?.emblem?.base || 'Common');
+  }
+
+  function getHeroSpellIcon(hero) {
+    if (!hero) return '/spells/flicker.png';
+    const custom = customLoadouts[hero.hero_name];
+    if (custom?.spell?.name || custom?.spell?.id) {
+      return engine.getSpellIcon(custom.spell.name || custom.spell.id);
+    }
+    const guide = engine.getHeroBuild(hero.hero_name);
+    return engine.getSpellIcon(guide?.spells?.primary?.name || 'Flicker');
+  }
+
+  function getHeroBuildIcon(hero) {
+    if (!hero) return '/items/blade_of_despair.png';
+    const custom = customLoadouts[hero.hero_name];
+    if (custom?.items?.[0]) {
+      return engine.getItemIcon(custom.items[0]);
+    }
+    const guide = engine.getHeroBuild(hero.hero_name);
+    const firstItem = guide?.items?.core?.[0]?.name;
+    return engine.getItemIcon(firstItem || 'Blade of Despair');
+  }
 </script>
 
 <div class="draft-arena">
@@ -40,9 +75,39 @@
           onclick={() => onSlotClick('my', index)}
           onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSlotClick('my', index); } }}
         >
-          <div class="card-lane-strip">
-            <span class="lane-code">{code}</span>
-            <span class="lane-name">{lane}</span>
+          <div class="card-lane-strip" class:has-hero={!!hero}>
+            <div class="lane-strip-left">
+              <span class="lane-code">{code}</span>
+              <span class="lane-name">{lane}</span>
+            </div>
+            {#if hero}
+              <div class="lane-strip-setup" role="group" aria-label="Setup Buttons">
+                <button
+                  type="button"
+                  class="setup-icon-btn emblem-btn"
+                  title="Setup Emblem ({hero.hero_name})"
+                  onclick={(e) => { e.stopPropagation(); onOpenPreparation && onOpenPreparation(hero, 'emblem'); }}
+                >
+                  <img src={getHeroEmblemIcon(hero)} alt="Emblem" class="strip-icon" />
+                </button>
+                <button
+                  type="button"
+                  class="setup-icon-btn spell-btn"
+                  title="Setup Battle Spell ({hero.hero_name})"
+                  onclick={(e) => { e.stopPropagation(); onOpenPreparation && onOpenPreparation(hero, 'spell'); }}
+                >
+                  <img src={getHeroSpellIcon(hero)} alt="Spell" class="strip-icon" />
+                </button>
+                <button
+                  type="button"
+                  class="setup-icon-btn build-btn"
+                  title="Setup Build Items ({hero.hero_name})"
+                  onclick={(e) => { e.stopPropagation(); onOpenPreparation && onOpenPreparation(hero, 'build'); }}
+                >
+                  <img src={getHeroBuildIcon(hero)} alt="Build Items" class="strip-icon" />
+                </button>
+              </div>
+            {/if}
           </div>
 
           {#if hero}
@@ -115,9 +180,39 @@
           onclick={() => onSlotClick('enemy', index)}
           onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSlotClick('enemy', index); } }}
         >
-          <div class="card-lane-strip enemy-strip">
-            <span class="lane-code">SLOT</span>
-            <span class="lane-name">ENEMY 0{index + 1}</span>
+          <div class="card-lane-strip enemy-strip" class:has-hero={!!hero}>
+            <div class="lane-strip-left">
+              <span class="lane-code">SLOT</span>
+              <span class="lane-name">ENEMY 0{index + 1}</span>
+            </div>
+            {#if hero}
+              <div class="lane-strip-setup" role="group" aria-label="Setup Buttons">
+                <button
+                  type="button"
+                  class="setup-icon-btn emblem-btn"
+                  title="Setup Emblem ({hero.hero_name})"
+                  onclick={(e) => { e.stopPropagation(); onOpenPreparation && onOpenPreparation(hero, 'emblem'); }}
+                >
+                  <img src={getHeroEmblemIcon(hero)} alt="Emblem" class="strip-icon" />
+                </button>
+                <button
+                  type="button"
+                  class="setup-icon-btn spell-btn"
+                  title="Setup Battle Spell ({hero.hero_name})"
+                  onclick={(e) => { e.stopPropagation(); onOpenPreparation && onOpenPreparation(hero, 'spell'); }}
+                >
+                  <img src={getHeroSpellIcon(hero)} alt="Spell" class="strip-icon" />
+                </button>
+                <button
+                  type="button"
+                  class="setup-icon-btn build-btn"
+                  title="Setup Build Items ({hero.hero_name})"
+                  onclick={(e) => { e.stopPropagation(); onOpenPreparation && onOpenPreparation(hero, 'build'); }}
+                >
+                  <img src={getHeroBuildIcon(hero)} alt="Build Items" class="strip-icon" />
+                </button>
+              </div>
+            {/if}
           </div>
 
           {#if hero}
@@ -282,13 +377,23 @@
   }
 
   .card-lane-strip {
-    background: rgba(5, 8, 16, 0.85);
+    background: rgba(5, 8, 16, 0.92);
     border-bottom: 1px solid var(--border-tech);
-    padding: 0.35rem 0.5rem;
+    padding: 0.3rem 0.45rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
     z-index: 2;
+    min-height: 28px;
+    gap: 0.4rem;
+  }
+
+  .lane-strip-left {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    min-width: 0;
+    overflow: hidden;
   }
 
   .lane-code {
@@ -296,6 +401,7 @@
     font-size: 0.65rem;
     font-weight: 700;
     color: var(--ally-cyan);
+    flex-shrink: 0;
   }
 
   .enemy-strip .lane-code {
@@ -304,12 +410,60 @@
 
   .lane-name {
     font-family: var(--font-mono);
-    font-size: 0.58rem;
+    font-size: 0.56rem;
     color: var(--text-dim);
     letter-spacing: 0.5px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+
+  .lane-strip-setup {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex-shrink: 0;
+  }
+
+  .setup-icon-btn {
+    width: 22px;
+    height: 22px;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    overflow: hidden;
+    transition: all 0.15s ease;
+  }
+
+  .setup-icon-btn:hover {
+    transform: scale(1.15);
+    z-index: 10;
+  }
+
+  .emblem-btn:hover {
+    border-color: #38bdf8;
+    box-shadow: 0 0 8px rgba(56, 189, 248, 0.6);
+  }
+
+  .spell-btn:hover {
+    border-color: #f59e0b;
+    box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
+  }
+
+  .build-btn:hover {
+    border-color: #a855f7;
+    box-shadow: 0 0 8px rgba(168, 85, 247, 0.6);
+  }
+
+  .strip-icon {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 
   .hero-art-frame {

@@ -5,6 +5,7 @@
   import HeroDetailPanel from './lib/HeroDetailPanel.svelte';
   import HeroPickerModal from './lib/HeroPickerModal.svelte';
   import BackgroundSelector from './lib/BackgroundSelector.svelte';
+  import PreparationModal from './lib/PreparationModal.svelte';
 
   import * as engine from './lib/counterEngine.js';
 
@@ -45,9 +46,34 @@
   let activeHeroIndex = $state(0);
   let inspectedHero = $state(null);
 
-  // Modal State
+  // Modal State: Hero Picker
   let isModalOpen = $state(false);
   let activeSlotToPick = $state(null); // { team: 'my' | 'enemy', index: 0..4 }
+
+  // Modal State: Preparation (Build, Emblem, Spell)
+  let isPrepModalOpen = $state(false);
+  let prepTargetHero = $state(null);
+  let prepInitialTab = $state('build'); // 'build' | 'emblem' | 'spell'
+  let customLoadouts = $state({}); // { [hero_name]: { items, emblem, spell } }
+
+  function handleOpenPreparation(hero, tab = 'build') {
+    if (!hero) return;
+    prepTargetHero = hero;
+    prepInitialTab = tab;
+    isPrepModalOpen = true;
+  }
+
+  function handleSavePreparation(loadout) {
+    if (!loadout?.hero) return;
+    customLoadouts = {
+      ...customLoadouts,
+      [loadout.hero.hero_name]: {
+        items: loadout.items,
+        emblem: loadout.emblem,
+        spell: loadout.spell
+      }
+    };
+  }
 
   // Derived: Filtered lists of heroes
   let selectedEnemyHeroes = $derived(enemyTeam.filter(Boolean));
@@ -207,10 +233,12 @@
       {myTeam}
       {enemyTeam}
       selectedSlot={activeSlotToPick}
+      {customLoadouts}
       onSlotClick={handleSlotClick}
       onRemoveHero={handleRemoveHero}
       onLoadPreset={handleLoadPreset}
       onReset={handleReset}
+      onOpenPreparation={handleOpenPreparation}
     />
 
     <!-- Threat Analysis Radar -->
@@ -232,6 +260,8 @@
           <HeroDetailPanel
             guide={matchupGuide}
             allHeroes={engine.getAllHeroes()}
+            customLoadout={activeAllyHero ? customLoadouts[activeAllyHero.hero_name] : null}
+            onOpenPreparation={handleOpenPreparation}
             onSelectHero={(h) => inspectedHero = h}
           />
         {:else}
@@ -274,6 +304,17 @@
     excludedHeroes={excludedHeroNames}
     onClose={() => isModalOpen = false}
     onSelect={handleHeroSelected}
+  />
+
+  <!-- Preparation Modal (Build Items, Emblem Matrix, Battle Spell) -->
+  <PreparationModal
+    isOpen={isPrepModalOpen}
+    hero={prepTargetHero}
+    initialTab={prepInitialTab}
+    customLoadout={prepTargetHero ? customLoadouts[prepTargetHero.hero_name] : null}
+    enemyHeroes={selectedEnemyHeroes}
+    onClose={() => isPrepModalOpen = false}
+    onSave={handleSavePreparation}
   />
 </div>
 
