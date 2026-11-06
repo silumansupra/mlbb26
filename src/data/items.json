@@ -439,7 +439,7 @@
   {
     "item_name": "Haas' Claws",
     "id": "a011",
-    "icon": "/items/haas'_claws.png",
+    "icon": "/items/haas_claws.png",
     "item_tier": "3",
     "item_category": "Attack",
     "data": [

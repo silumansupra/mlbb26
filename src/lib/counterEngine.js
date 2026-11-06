@@ -101,13 +101,17 @@ export function getAllTalents() {
 export function getItemByName(name) {
   if (!name) return null;
   const clean = name.toLowerCase().replace(/[^a-z0-9]/g, '');
+  if (clean.includes('haas')) {
+    return itemsData.find(i => i.item_name.toLowerCase().includes('haas')) || null;
+  }
   return itemsData.find(i => i.item_name.toLowerCase().replace(/[^a-z0-9]/g, '') === clean) || null;
 }
 
 export function getItemIcon(name) {
+  if (!name) return '/items/dagger.png';
+  if (name.toLowerCase().includes('haas')) return '/items/haas_claws.png';
   const item = getItemByName(name);
   if (item && item.icon) return item.icon;
-  if (!name) return '/items/dagger.png';
   const slug = name.toLowerCase().replace(/[^a-z0-9]/g, '_');
   return `/items/${slug}.png`;
 }
