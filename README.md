@@ -92,7 +92,14 @@ Pastikan kamu sudah menginstal [Node.js](https://nodejs.org/) (versi 18 ke atas)
 
 ---
 
-## 📜 Lisensi & Atribusi
+## 🙏 Kredit & Atribusi (Credits)
 
-- Data metadata hero, item, dan emblem bersumber dari dokumentasi dan API terbuka MLBB.
-- Proyek ini dirilis di bawah lisensi [MIT](LICENSE).
+Aplikasi ini menggunakan dataset metadata MLBB yang luar biasa dan dikurasi oleh:
+- **[p3hndrx/MLBB-API](https://github.com/p3hndrx/MLBB-API)** oleh [@p3hndrx](https://github.com/p3hndrx) — Basis data utama untuk metadata hero, atribut skill, relasi counter/sinergi resmi, spesifikasi emblem & talent, serta item game.
+- Seluruh aset gambar portrait hero, icon skill, dan intellectual property terkait Mobile Legends: Bang Bang merupakan hak cipta milik **Moonton / Shanghai Moonton Technology Co., Ltd.**
+
+---
+
+## 📜 Lisensi
+
+Proyek ini dirilis di bawah lisensi [MIT](LICENSE).

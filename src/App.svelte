@@ -188,6 +188,21 @@
     </div>
   </main>
 
+  <!-- Footer with Credits -->
+  <footer class="app-footer">
+    <div class="footer-content">
+      <p class="copyright">
+        MLBB Draft & Counter Assistant © 2026 • Dirilis di bawah lisensi MIT.
+      </p>
+      <p class="credits-text">
+        Basis data hero, item, dan emblem didukung oleh repositori open-source
+        <a href="https://github.com/p3hndrx/MLBB-API" target="_blank" rel="noopener noreferrer" class="credit-link">
+          p3hndrx/MLBB-API
+        </a>. Seluruh aset gambar dan IP adalah hak cipta milik Moonton.
+      </p>
+    </div>
+  </footer>
+
   <!-- Hero Picker Modal -->
   <HeroPickerModal
     isOpen={isModalOpen}
@@ -344,5 +359,42 @@
   .cta-preset-btn:hover {
     background: #2563eb;
     transform: translateY(-2px);
+  }
+
+  .app-footer {
+    border-top: 1px solid var(--border-color);
+    background: rgba(10, 15, 26, 0.7);
+    padding: 1.5rem;
+    margin-top: auto;
+    text-align: center;
+  }
+
+  .footer-content {
+    max-width: 800px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .copyright {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+
+  .credits-text {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+
+  .credit-link {
+    color: var(--gold-accent);
+    text-decoration: underline;
+    font-weight: 600;
+  }
+
+  .credit-link:hover {
+    color: #fbbf24;
   }
 </style>
