@@ -21,8 +21,10 @@
 
   // Derived background URL
   let bgStyleUrl = $derived(
-    activeBg === 'abyss' ? "url('/backgrounds/bg-abyss.jfif')" :
-    activeBg === 'aurora' ? "url('/backgrounds/bg-aurora.jfif')" : 'none'
+    activeBg === 'abyss' ? "url('/backgrounds/bg-abyss.jpg')" :
+    activeBg === 'aurora' ? "url('/backgrounds/bg-aurora.jpg')" :
+    activeBg === 'arena' ? "url('/backgrounds/bg-arena.jpg')" :
+    activeBg === 'battlefield' ? "url('/backgrounds/bg-battlefield.jpg')" : 'none'
   );
 
   // State: My Team (5 slots) and Enemy Team (5 slots)

@@ -2,8 +2,10 @@
   let { currentBg = 'abyss', onSelectBg } = $props();
 
   const options = [
-    { id: 'abyss', label: 'Abyss Series', url: '/backgrounds/bg-abyss.jfif' },
-    { id: 'aurora', label: 'Arena 2', url: '/backgrounds/bg-aurora.jfif' },
+    { id: 'abyss', label: 'Abyss Series', url: '/backgrounds/bg-abyss.jpg' },
+    { id: 'aurora', label: 'Arena 2', url: '/backgrounds/bg-aurora.jpg' },
+    { id: 'arena', label: 'Moonton Stadium', url: '/backgrounds/bg-arena.jpg' },
+    { id: 'battlefield', label: 'Battlefield', url: '/backgrounds/bg-battlefield.jpg' },
     { id: 'dark', label: 'Stealth Dark', url: '' }
   ];
 </script>
@@ -34,6 +36,7 @@
     border: 1px solid var(--border-tech);
     padding: 0.25rem 0.6rem;
     border-radius: var(--radius-sm);
+    flex-wrap: wrap;
   }
 
   .bg-label {
@@ -47,6 +50,7 @@
   .bg-pills {
     display: flex;
     gap: 0.25rem;
+    flex-wrap: wrap;
   }
 
   .bg-pill {
