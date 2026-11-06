@@ -1,13 +1,13 @@
 <script>
   import { getAllHeroes, normalizeLane } from './counterEngine.js';
 
-  let { isOpen = false, onClose, onSelect, title = 'Pilih Hero', excludedHeroes = [] } = $props();
+  let { isOpen = false, onClose, onSelect, title = 'CHOOSE HERO', excludedHeroes = [] } = $props();
 
   let searchQuery = $state('');
-  let selectedRole = $state('All');
+  let selectedRole = $state('ALL');
 
   const heroes = getAllHeroes();
-  const roles = ['All', 'Marksman', 'Assassin', 'Mage', 'Fighter', 'Tank', 'Support'];
+  const roles = ['ALL', 'MARKSMAN', 'ASSASSIN', 'MAGE', 'FIGHTER', 'TANK', 'SUPPORT'];
 
   let filteredHeroes = $derived(
     heroes.filter(hero => {
@@ -15,9 +15,9 @@
       if (excludedHeroes.includes(hero.hero_name)) return false;
 
       // Filter by role
-      if (selectedRole !== 'All') {
-        const cls = (hero.class || '').toLowerCase();
-        if (!cls.includes(selectedRole.toLowerCase())) return false;
+      if (selectedRole !== 'ALL') {
+        const cls = (hero.class || '').toUpperCase();
+        if (!cls.includes(selectedRole)) return false;
       }
 
       // Filter by search query
@@ -50,45 +50,46 @@
 
 {#if isOpen}
   <div
-    class="modal-backdrop"
+    class="modal-scrim"
     onclick={onClose}
     onkeydown={(e) => { if (e.key === 'Escape') onClose(); }}
     role="presentation"
   >
     <div
-      class="modal-card"
+      class="modal-dossier tech-bracket"
       onclick={(e) => e.stopPropagation()}
       onkeydown={(e) => e.stopPropagation()}
       role="dialog"
       aria-modal="true"
       tabindex="-1"
     >
-      <div class="modal-header">
-        <div>
-          <h3>{title}</h3>
-          <p class="subtitle">Pilih hero dari database resmi MLBB</p>
+      <div class="modal-top">
+        <div class="top-title-col">
+          <span class="modal-sub-tag">MLBB ARSENAL // 133 HEROES</span>
+          <h3 class="modal-heading">{title}</h3>
         </div>
-        <button class="close-btn" onclick={onClose} aria-label="Tutup">✕</button>
+        <button type="button" class="dismiss-btn" onclick={onClose} aria-label="Tutup">✕</button>
       </div>
 
-      <div class="filter-controls">
-        <div class="search-box">
-          <span class="search-icon">🔍</span>
+      <div class="dossier-filters">
+        <div class="search-terminal">
+          <span class="terminal-prefix">></span>
           <input
             type="text"
-            placeholder="Cari hero, role, atau lane..."
+            placeholder="Ketik nama hero, role, atau lane..."
             bind:value={searchQuery}
           />
           {#if searchQuery}
-            <button class="clear-search" onclick={() => searchQuery = ''}>✕</button>
+            <button type="button" class="purge-search" onclick={() => searchQuery = ''}>✕</button>
           {/if}
         </div>
 
-        <div class="role-chips">
+        <div class="role-matrix">
           {#each roles as role}
             <button
-              class="role-chip"
-              class:active={selectedRole === role}
+              type="button"
+              class="role-trigger"
+              class:is-active={selectedRole === role}
               onclick={() => selectedRole = role}
             >
               {role}
@@ -97,28 +98,29 @@
         </div>
       </div>
 
-      <div class="heroes-grid">
+      <div class="arsenal-grid">
         {#each filteredHeroes as hero (hero.hero_name)}
-          <button class="hero-item" onclick={() => handleSelect(hero)}>
-            <div class="portrait-wrapper">
+          <button type="button" class="arsenal-card tech-bracket" onclick={() => handleSelect(hero)}>
+            <div class="card-art-box">
               <img
                 src={hero.portrait || '/default-hero.webp'}
                 alt={hero.hero_name}
                 loading="lazy"
                 onerror={(e) => { e.target.style.display = 'none'; }}
               />
-              <span class="lane-tag">{normalizeLane(hero)}</span>
+              <span class="card-lane-badge">{normalizeLane(hero)}</span>
             </div>
-            <div class="hero-meta">
-              <span class="hero-name">{hero.hero_name}</span>
-              <span class="hero-class">{hero.class}</span>
+            <div class="card-caption">
+              <span class="card-callsign">{hero.hero_name}</span>
+              <span class="card-spec">{hero.class}</span>
             </div>
           </button>
         {/each}
 
         {#if filteredHeroes.length === 0}
-          <div class="no-results">
-            <p>Tidak ada hero yang sesuai dengan pencarian "{searchQuery}"</p>
+          <div class="no-matches">
+            <span class="no-match-code">QUERY_NOT_FOUND</span>
+            <p>Tidak ada hero yang sesuai dengan kueri "{searchQuery}".</p>
           </div>
         {/if}
       </div>
@@ -127,11 +129,11 @@
 {/if}
 
 <style>
-  .modal-backdrop {
+  .modal-scrim {
     position: fixed;
     inset: 0;
-    background: rgba(4, 7, 14, 0.85);
-    backdrop-filter: blur(8px);
+    background: rgba(3, 5, 10, 0.88);
+    backdrop-filter: blur(12px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -139,211 +141,250 @@
     padding: 1.5rem;
   }
 
-  .modal-card {
-    background: var(--bg-surface);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-xl);
+  .modal-dossier {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-tech-bright);
+    border-radius: var(--radius-md);
     width: 100%;
-    max-width: 860px;
+    max-width: 900px;
     max-height: 85vh;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+    box-shadow: 0 32px 64px rgba(0, 0, 0, 0.8);
     overflow: hidden;
   }
 
-  .modal-header {
+  .modal-top {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1.25rem 1.5rem;
-    border-bottom: 1px solid var(--border-color);
+    padding: 1.25rem 1.75rem;
+    border-bottom: 1px solid var(--border-tech);
+    background: rgba(5, 7, 13, 0.4);
   }
 
-  .modal-header h3 {
-    font-size: 1.25rem;
+  .top-title-col {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .modal-sub-tag {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
     font-weight: 700;
-    color: var(--text-main);
+    color: var(--gold-mythic);
+    letter-spacing: 1.5px;
   }
 
-  .subtitle {
-    font-size: 0.85rem;
-    color: var(--text-muted);
+  .modal-heading {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-pure);
+    letter-spacing: 1px;
   }
 
-  .close-btn {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
+  .dismiss-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-xs);
     background: rgba(255, 255, 255, 0.05);
-    color: var(--text-muted);
-    font-size: 1.1rem;
+    color: var(--text-dim);
+    font-size: 0.9rem;
     display: flex;
     align-items: center;
     justify-content: center;
+    border: 1px solid var(--border-tech);
+    transition: all 0.15s ease;
   }
 
-  .close-btn:hover {
-    background: rgba(255, 255, 255, 0.15);
-    color: white;
+  .dismiss-btn:hover {
+    background: rgba(244, 63, 94, 0.2);
+    color: var(--enemy-crimson);
+    border-color: var(--enemy-border);
   }
 
-  .filter-controls {
-    padding: 1rem 1.5rem;
+  .dossier-filters {
+    padding: 1rem 1.75rem;
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
-    border-bottom: 1px solid var(--border-color);
-    background: rgba(0, 0, 0, 0.15);
+    gap: 0.85rem;
+    border-bottom: 1px solid var(--border-tech);
+    background: rgba(0, 0, 0, 0.25);
   }
 
-  .search-box {
+  .search-terminal {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    background: var(--bg-surface-elevated);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
+    gap: 0.6rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-tech);
+    border-radius: var(--radius-xs);
     padding: 0.6rem 0.9rem;
+    transition: all 0.15s ease;
   }
 
-  .search-box:focus-within {
-    border-color: var(--primary-blue);
-    box-shadow: 0 0 0 2px var(--primary-blue-glow);
+  .search-terminal:focus-within {
+    border-color: var(--ally-cyan);
+    box-shadow: 0 0 16px var(--ally-glow);
   }
 
-  .search-icon {
-    font-size: 0.9rem;
-    opacity: 0.7;
+  .terminal-prefix {
+    font-family: var(--font-mono);
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--ally-cyan);
   }
 
-  .search-box input {
+  .search-terminal input {
     flex: 1;
     background: none;
     border: none;
-    color: var(--text-main);
-    font-size: 0.95rem;
+    color: var(--text-pure);
+    font-size: 0.9rem;
     outline: none;
   }
 
-  .clear-search {
+  .purge-search {
     color: var(--text-dim);
     font-size: 0.85rem;
   }
 
-  .role-chips {
+  .role-matrix {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: 0.4rem;
   }
 
-  .role-chip {
-    padding: 0.35rem 0.85rem;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    background: var(--bg-surface-elevated);
-    color: var(--text-muted);
-    border: 1px solid var(--border-color);
+  .role-trigger {
+    font-family: var(--font-display);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 0.35rem 0.75rem;
+    border-radius: var(--radius-xs);
+    background: var(--bg-card);
+    color: var(--text-dim);
+    border: 1px solid var(--border-tech);
+    transition: all 0.15s ease;
   }
 
-  .role-chip:hover {
+  .role-trigger:hover {
+    color: var(--text-pure);
+    border-color: var(--border-tech-bright);
+  }
+
+  .role-trigger.is-active {
+    background: var(--ally-blue);
     color: white;
-    border-color: var(--border-light);
+    border-color: var(--ally-cyan);
+    box-shadow: 0 0 12px var(--ally-glow);
   }
 
-  .role-chip.active {
-    background: var(--primary-blue);
-    color: white;
-    border-color: var(--primary-blue);
-    box-shadow: 0 0 10px var(--primary-blue-glow);
-  }
-
-  .heroes-grid {
-    padding: 1.25rem 1.5rem;
+  .arsenal-grid {
+    padding: 1.5rem 1.75rem;
     overflow-y: auto;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(115px, 1fr));
+    gap: 0.85rem;
     flex: 1;
   }
 
-  .hero-item {
+  .arsenal-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-tech);
+    border-radius: var(--radius-xs);
+    padding: 0.5rem;
     display: flex;
     flex-direction: column;
     align-items: center;
-    background: var(--bg-surface-elevated);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    padding: 0.5rem;
     text-align: center;
-    transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+    transition: all 0.15s ease;
   }
 
-  .hero-item:hover {
+  .arsenal-card:hover {
     transform: translateY(-3px);
-    border-color: var(--primary-blue);
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+    border-color: var(--ally-cyan);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
   }
 
-  .portrait-wrapper {
+  .card-art-box {
     position: relative;
-    width: 70px;
-    height: 70px;
-    border-radius: 50%;
+    width: 64px;
+    height: 64px;
+    border-radius: var(--radius-xs);
     overflow: hidden;
-    margin-bottom: 0.4rem;
-    border: 2px solid rgba(255, 255, 255, 0.1);
-    background: #0f1523;
+    margin-bottom: 0.45rem;
+    border: 1px solid var(--border-tech);
+    background: #090e18;
   }
 
-  .portrait-wrapper img {
+  .card-art-box img {
     width: 100%;
     height: 100%;
     object-fit: cover;
   }
 
-  .lane-tag {
+  .card-lane-badge {
     position: absolute;
     bottom: 0;
     left: 0;
     right: 0;
-    background: rgba(10, 15, 26, 0.9);
-    font-size: 0.6rem;
+    background: rgba(5, 7, 13, 0.9);
+    font-family: var(--font-mono);
+    font-size: 0.55rem;
     font-weight: 700;
     padding: 1px 0;
-    color: var(--gold-accent);
-    text-transform: uppercase;
+    color: var(--gold-mythic);
+    letter-spacing: 0.5px;
   }
 
-  .hero-meta {
+  .card-caption {
     display: flex;
     flex-direction: column;
     gap: 2px;
     width: 100%;
   }
 
-  .hero-name {
-    font-size: 0.82rem;
+  .card-callsign {
+    font-family: var(--font-display);
+    font-size: 0.85rem;
     font-weight: 700;
-    color: var(--text-main);
+    color: var(--text-pure);
+    letter-spacing: 0.5px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
-  .hero-class {
-    font-size: 0.7rem;
+  .card-spec {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
     color: var(--text-dim);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
-  .no-results {
+  .no-matches {
     grid-column: 1 / -1;
     text-align: center;
     padding: 3rem 1rem;
+  }
+
+  .no-match-code {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 700;
     color: var(--text-dim);
+    letter-spacing: 2px;
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+
+  .no-matches p {
+    font-size: 0.85rem;
+    color: var(--text-muted);
   }
 </style>

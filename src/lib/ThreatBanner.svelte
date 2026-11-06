@@ -3,183 +3,226 @@
 </script>
 
 {#if threats.length > 0}
-  <div class="threats-container">
-    <div class="threats-header">
-      <div class="title-with-badge">
-        <span class="warning-icon">⚡</span>
-        <h3>Analisis Ancaman Draft Musuh ({threats.length})</h3>
+  <section class="telemetry-console">
+    <div class="console-head">
+      <div class="head-left">
+        <span class="live-pulse"></span>
+        <h3 class="head-title">TACTICAL THREAT RADAR</h3>
+        <span class="threat-counter">{threats.length} HAZARDS IDENTIFIED</span>
       </div>
-      <p class="threat-subtitle">Deteksi otomatis bahaya utama dan respon strategi tim</p>
+      <div class="head-right">
+        <span class="protocol-code">SYS//REACTION_MATRIX_V2</span>
+      </div>
     </div>
 
-    <div class="threats-grid">
+    <div class="telemetry-grid">
       {#each threats as threat}
-        <div class="threat-card threat-{threat.level.toLowerCase()}">
-          <div class="threat-top">
-            <span class="threat-badge">{threat.level} THREAT</span>
-            <span class="threat-title">{threat.title}</span>
+        <div class="hazard-cell hazard-{threat.level.toLowerCase()}">
+          <div class="hazard-meta">
+            <span class="hazard-sev">{threat.level === 'CRITICAL' ? 'SEV-1 // CRITICAL' : 'SEV-2 // HIGH'}</span>
+            <h4 class="hazard-title">{threat.title.toUpperCase()}</h4>
           </div>
 
-          <div class="threat-heroes">
-            <span class="heroes-label">Hero Musuh:</span>
-            <div class="heroes-chips">
+          <div class="targets-band">
+            <span class="band-tag">SOURCES:</span>
+            <div class="targets-list">
               {#each threat.heroes as heroName}
-                <span class="hero-chip">{heroName}</span>
+                <span class="target-chip">{heroName}</span>
               {/each}
             </div>
           </div>
 
-          <div class="threat-advice">
-            <span class="advice-icon">💡</span>
-            <p>{threat.advice}</p>
+          <div class="directive-box">
+            <div class="directive-accent"></div>
+            <p class="directive-text">{threat.advice}</p>
           </div>
         </div>
       {/each}
     </div>
-  </div>
+  </section>
 {/if}
 
 <style>
-  .threats-container {
-    background: linear-gradient(180deg, rgba(239, 68, 68, 0.05) 0%, rgba(17, 23, 38, 0.9) 100%);
-    border: 1px solid rgba(239, 68, 68, 0.2);
-    border-radius: var(--radius-lg);
+  .telemetry-console {
+    background: var(--bg-panel);
+    border: 1px solid var(--enemy-border);
+    border-radius: var(--radius-md);
     padding: 1.25rem 1.5rem;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.75rem;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6);
   }
 
-  .threats-header {
-    margin-bottom: 1rem;
-  }
-
-  .title-with-badge {
+  .console-head {
     display: flex;
+    justify-content: space-between;
     align-items: center;
+    border-bottom: 1px solid var(--border-tech);
+    padding-bottom: 0.75rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
     gap: 0.5rem;
   }
 
-  .warning-icon {
-    font-size: 1.25rem;
-    color: var(--primary-red);
+  .head-left {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
   }
 
-  .title-with-badge h3 {
-    font-size: 1.1rem;
+  .live-pulse {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--enemy-red);
+    box-shadow: 0 0 10px var(--enemy-red);
+    animation: radarPulse 1.8s infinite ease-in-out;
+  }
+
+  @keyframes radarPulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.4); opacity: 0.4; }
+  }
+
+  .head-title {
+    font-family: var(--font-display);
+    font-size: 1rem;
     font-weight: 700;
-    color: var(--text-main);
+    letter-spacing: 1.5px;
+    color: var(--text-pure);
   }
 
-  .threat-subtitle {
-    font-size: 0.85rem;
-    color: var(--text-muted);
-    margin-top: 2px;
+  .threat-counter {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--enemy-crimson);
+    background: rgba(244, 63, 94, 0.15);
+    border: 1px solid var(--enemy-border);
+    padding: 2px 7px;
+    border-radius: var(--radius-xs);
+    letter-spacing: 0.5px;
   }
 
-  .threats-grid {
+  .protocol-code {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+  }
+
+  .telemetry-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
     gap: 1rem;
   }
 
-  .threat-card {
-    background: var(--bg-surface-elevated);
-    border-radius: var(--radius-md);
+  .hazard-cell {
+    background: var(--bg-card);
+    border: 1px solid var(--border-tech);
+    border-radius: var(--radius-sm);
     padding: 1rem;
-    border: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
-    gap: 0.65rem;
-    border-left: 4px solid var(--border-light);
+    gap: 0.7rem;
+    border-left: 3px solid var(--border-tech-bright);
+    transition: transform 0.15s ease, border-color 0.15s ease;
   }
 
-  .threat-card.threat-critical {
-    border-left-color: var(--primary-red);
-    background: linear-gradient(90deg, rgba(239, 68, 68, 0.08) 0%, var(--bg-surface-elevated) 100%);
+  .hazard-critical {
+    border-left-color: var(--enemy-red);
+    background: linear-gradient(90deg, rgba(244, 63, 94, 0.08) 0%, var(--bg-card) 60%);
   }
 
-  .threat-card.threat-high {
-    border-left-color: var(--gold-accent);
-    background: linear-gradient(90deg, rgba(245, 158, 11, 0.08) 0%, var(--bg-surface-elevated) 100%);
+  .hazard-high {
+    border-left-color: var(--gold-mythic);
+    background: linear-gradient(90deg, rgba(251, 191, 36, 0.08) 0%, var(--bg-card) 60%);
   }
 
-  .threat-card.threat-medium {
-    border-left-color: var(--primary-blue);
+  .hazard-medium {
+    border-left-color: var(--ally-cyan);
   }
 
-  .threat-top {
+  .hazard-meta {
     display: flex;
-    align-items: center;
-    gap: 0.6rem;
+    flex-direction: column;
+    gap: 2px;
   }
 
-  .threat-badge {
-    font-size: 0.65rem;
-    font-weight: 800;
-    padding: 2px 6px;
-    border-radius: 4px;
-    background: rgba(255, 255, 255, 0.1);
-    letter-spacing: 0.5px;
+  .hazard-sev {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    font-weight: 700;
+    color: var(--text-dim);
+    letter-spacing: 1px;
   }
 
-  .threat-critical .threat-badge {
-    background: rgba(239, 68, 68, 0.2);
-    color: #fca5a5;
+  .hazard-critical .hazard-sev {
+    color: var(--enemy-crimson);
   }
 
-  .threat-high .threat-badge {
-    background: rgba(245, 158, 11, 0.2);
-    color: #fcd34d;
+  .hazard-high .hazard-sev {
+    color: var(--gold-mythic);
   }
 
-  .threat-title {
+  .hazard-title {
+    font-family: var(--font-display);
     font-size: 0.95rem;
     font-weight: 700;
-    color: var(--text-main);
+    letter-spacing: 0.5px;
+    color: var(--text-pure);
   }
 
-  .threat-heroes {
+  .targets-band {
     display: flex;
     align-items: center;
     gap: 0.5rem;
     flex-wrap: wrap;
   }
 
-  .heroes-label {
-    font-size: 0.75rem;
+  .band-tag {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    font-weight: 700;
     color: var(--text-dim);
-    font-weight: 600;
   }
 
-  .heroes-chips {
+  .targets-list {
     display: flex;
     flex-wrap: wrap;
     gap: 0.35rem;
   }
 
-  .hero-chip {
-    font-size: 0.75rem;
+  .target-chip {
+    font-family: var(--font-display);
+    font-size: 0.72rem;
     font-weight: 700;
-    padding: 2px 7px;
-    border-radius: 4px;
-    background: rgba(239, 68, 68, 0.15);
-    color: #fca5a5;
-    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #fecdd3;
+    background: rgba(244, 63, 94, 0.18);
+    border: 1px solid rgba(244, 63, 94, 0.35);
+    padding: 1px 7px;
+    border-radius: var(--radius-xs);
+    letter-spacing: 0.5px;
   }
 
-  .threat-advice {
+  .directive-box {
     display: flex;
-    align-items: flex-start;
-    gap: 0.5rem;
-    background: rgba(0, 0, 0, 0.25);
-    padding: 0.6rem 0.8rem;
-    border-radius: var(--radius-sm);
-    font-size: 0.82rem;
-    color: #e2e8f0;
-    line-height: 1.4;
+    gap: 0.6rem;
+    background: rgba(5, 7, 13, 0.5);
+    border: 1px solid var(--border-tech);
+    padding: 0.6rem 0.75rem;
+    border-radius: var(--radius-xs);
   }
 
-  .advice-icon {
-    font-size: 0.9rem;
+  .directive-accent {
+    width: 2px;
+    background: var(--gold-mythic);
+    border-radius: 2px;
     flex-shrink: 0;
+  }
+
+  .directive-text {
+    font-size: 0.8rem;
+    color: #cbd5e1;
+    line-height: 1.4;
   }
 </style>

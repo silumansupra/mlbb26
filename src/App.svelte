@@ -4,8 +4,26 @@
   import CounterRecommendations from './lib/CounterRecommendations.svelte';
   import HeroDetailPanel from './lib/HeroDetailPanel.svelte';
   import HeroPickerModal from './lib/HeroPickerModal.svelte';
+  import BackgroundSelector from './lib/BackgroundSelector.svelte';
 
   import * as engine from './lib/counterEngine.js';
+
+  // State: Active Background with LocalStorage persistence
+  const savedBg = typeof localStorage !== 'undefined' ? localStorage.getItem('mlbb_draft_bg') : null;
+  let activeBg = $state(savedBg || 'abyss');
+
+  function handleSelectBg(bgId) {
+    activeBg = bgId;
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('mlbb_draft_bg', bgId);
+    }
+  }
+
+  // Derived background URL
+  let bgStyleUrl = $derived(
+    activeBg === 'abyss' ? "url('/backgrounds/bg-abyss.jfif')" :
+    activeBg === 'aurora' ? "url('/backgrounds/bg-aurora.jfif')" : 'none'
+  );
 
   // State: My Team (5 slots) and Enemy Team (5 slots)
   let myTeam = $state([null, null, null, null, null]);
@@ -87,7 +105,7 @@
     }
   }
 
-  // Quick Action: Load User's Enemy Matchup (Tigreal, Aamon, Cici, Badang)
+  // Quick Action: Load Preset (Tigreal, Aamon, Cici, Badang)
   function handleLoadPreset() {
     const tigreal = engine.getHeroByName('Tigreal');
     const aamon = engine.getHeroByName('Aamon');
@@ -114,7 +132,6 @@
   // Quick Action: Pick recommended counter into My Team
   function handlePickToMyTeam(hero) {
     const next = [...myTeam];
-    // Find first empty slot or replace current active slot
     const emptyIdx = next.findIndex(slot => slot === null);
     if (emptyIdx !== -1) {
       next[emptyIdx] = hero;
@@ -126,27 +143,43 @@
   }
 </script>
 
-<div class="app-container">
-  <!-- Top Navigation Bar -->
-  <header class="app-header">
-    <div class="header-content">
-      <div class="brand">
-        <span class="brand-icon">⚔️</span>
-        <div>
-          <h1 class="brand-title">MLBB DRAFT & COUNTER ASSISTANT</h1>
-          <p class="brand-subtitle">Strategi Counter Hero, Emblem, Battle Spell & Item Adaptif Otomatis</p>
+<!-- DYNAMIC WALLPAPER VIEWPORT LAYERS -->
+<div class="bg-viewport-layer" style:background-image={bgStyleUrl}></div>
+<div class="bg-scrim-layer"></div>
+
+<div class="broadcast-shell">
+  <!-- TOP TOURNAMENT STATUS HUD -->
+  <header class="broadcast-header">
+    <div class="header-inner">
+      <div class="brand-tactical">
+        <div class="brand-crest">
+          <span class="crest-accent">MLBB</span>
+        </div>
+        <div class="brand-text">
+          <div class="brand-headline">
+            <span class="status-live-dot"></span>
+            <h1 class="brand-title">TACTICAL DRAFT INTELLIGENCE</h1>
+          </div>
+          <span class="brand-telemetry">SEASON 2026 // ADAPTIVE COUNTER PROTOCOL</span>
         </div>
       </div>
 
-      <div class="header-badges">
-        <span class="patch-badge">Season Meta 2026</span>
-        <span class="db-badge">133 Hero DB</span>
+      <div class="header-hud-right">
+        <BackgroundSelector
+          currentBg={activeBg}
+          onSelectBg={handleSelectBg}
+        />
+        <div class="hud-stat-pill">
+          <span class="pill-k">DB:</span>
+          <span class="pill-v">133 HEROES</span>
+        </div>
       </div>
     </div>
   </header>
 
-  <main class="main-content">
-    <!-- Draft Board (Blue vs Red) -->
+  <!-- MAIN DRAFT STAGE -->
+  <main class="main-viewport">
+    <!-- Draft Arena (Blue Ally vs Red Enemy) -->
     <DraftBoard
       {myTeam}
       {enemyTeam}
@@ -157,56 +190,60 @@
       onReset={handleReset}
     />
 
-    <!-- Enemy Threat Alerts -->
+    <!-- Threat Analysis Radar -->
     <ThreatBanner threats={enemyThreats} />
 
-    <!-- Two-column or dynamic view: Counter Recommendations & Hero Detail Guide -->
-    <div class="dashboard-grid">
-      <!-- Left: Counter Hero Recommendations -->
-      <section class="grid-col">
+    <!-- Split Screen: Scouting Report vs Hero Tactical Console -->
+    <div class="split-viewport">
+      <!-- Left Column: Counter Scouting Recommendations -->
+      <div class="viewport-col">
         <CounterRecommendations
           recommendations={counterRecommendations}
           onPickToMyTeam={handlePickToMyTeam}
         />
-      </section>
+      </div>
 
-      <!-- Right: Detailed Hero Guide (Item, Spell, Emblem) -->
-      <section class="grid-col">
+      <!-- Right Column: Hero Matchup Console -->
+      <div class="viewport-col">
         {#if matchupGuide}
           <HeroDetailPanel guide={matchupGuide} />
         {:else}
-          <div class="placeholder-guide">
-            <div class="placeholder-icon">🛡️</div>
-            <h3>Pilih Hero di Tim Kamu</h3>
-            <p>Pilih salah satu hero di slot Tim Kamu (Ally) untuk melihat rekomendasi <strong>Battle Spell</strong>, <strong>Emblem & Talent</strong>, serta <strong>6 Item Counter Adaptif</strong> yang paling efektif melawan musuh.</p>
-            <button class="cta-preset-btn" onclick={handleLoadPreset}>
-              🚀 Coba Contoh Kasus: Lawan Tigreal, Aamon, Cici, Badang
+          <div class="empty-dossier tech-bracket">
+            <span class="empty-dossier-code">AWAITING_ACTIVE_HERO_SELECTION</span>
+            <h3 class="empty-title">PILOH HERO PADA TIM ALLY</h3>
+            <p class="empty-desc">
+              Pilih salah satu hero di slot <strong>Ally Roster</strong> (misal: Clint / Brody) untuk mengaktifkan kalkulasi konsol taktis: <strong>Battle Spell</strong>, <strong>Emblem Matrix</strong>, dan <strong>6 Item Counter Adaptif</strong>.
+            </p>
+            <button type="button" class="preset-cta-trigger" onclick={handleLoadPreset}>
+              <span>⚡</span> UJI CONTOH KASUS VS (TIGREAL, AAMON, CICI, BADANG)
             </button>
           </div>
         {/if}
-      </section>
+      </div>
     </div>
   </main>
 
-  <!-- Footer with Credits -->
-  <footer class="app-footer">
-    <div class="footer-content">
-      <p class="copyright">
-        MLBB Draft & Counter Assistant © 2026 • Dirilis di bawah lisensi MIT.
-      </p>
-      <p class="credits-text">
-        Basis data hero, item, dan emblem didukung oleh repositori open-source
-        <a href="https://github.com/p3hndrx/MLBB-API" target="_blank" rel="noopener noreferrer" class="credit-link">
+  <!-- Broadcast Footer -->
+  <footer class="broadcast-footer">
+    <div class="footer-inner">
+      <div class="footer-legal">
+        <span>MLBB DRAFT & COUNTER ASSISTANT © 2026</span>
+        <span class="divider">/</span>
+        <span>OPEN SOURCE TACTICAL TOOL</span>
+      </div>
+      <div class="footer-attribution">
+        Basis data resmi didukung oleh
+        <a href="https://github.com/p3hndrx/MLBB-API" target="_blank" rel="noopener noreferrer" class="credit-anchor">
           p3hndrx/MLBB-API
-        </a>. Seluruh aset gambar dan IP adalah hak cipta milik Moonton.
-      </p>
+        </a>. Seluruh intellectual property & aset visual milik Shanghai Moonton Technology Co., Ltd.
+      </div>
     </div>
   </footer>
 
   <!-- Hero Picker Modal -->
   <HeroPickerModal
     isOpen={isModalOpen}
-    title={activeSlotToPick?.team === 'my' ? `Pilih Hero Tim Kamu (Slot ${activeSlotToPick?.index + 1})` : `Pilih Hero Tim Musuh (Slot ${activeSlotToPick?.index + 1})`}
+    title={activeSlotToPick?.team === 'my' ? `SELECT ALLY (SLOT 0${activeSlotToPick?.index + 1})` : `SELECT OPPONENT (SLOT 0${activeSlotToPick?.index + 1})`}
     excludedHeroes={excludedHeroNames}
     onClose={() => isModalOpen = false}
     onSelect={handleHeroSelected}
@@ -214,24 +251,26 @@
 </div>
 
 <style>
-  .app-container {
+  .broadcast-shell {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    position: relative;
+    z-index: 1;
   }
 
-  .app-header {
-    background: rgba(17, 23, 38, 0.85);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--border-color);
-    padding: 1rem 1.5rem;
+  .broadcast-header {
+    background: rgba(5, 8, 16, 0.88);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border-tech);
+    padding: 0.85rem 1.75rem;
     position: sticky;
     top: 0;
     z-index: 100;
   }
 
-  .header-content {
-    max-width: 1400px;
+  .header-inner {
+    max-width: 1440px;
     margin: 0 auto;
     display: flex;
     justify-content: space-between;
@@ -240,161 +279,223 @@
     gap: 1rem;
   }
 
-  .brand {
+  .brand-tactical {
     display: flex;
     align-items: center;
     gap: 0.85rem;
   }
 
-  .brand-icon {
-    font-size: 2rem;
-    filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.4));
-  }
-
-  .brand-title {
-    font-size: 1.15rem;
-    font-weight: 800;
-    letter-spacing: 0.5px;
-    background: linear-gradient(90deg, #f8fafc 0%, #cbd5e1 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-
-  .brand-subtitle {
-    font-size: 0.78rem;
-    color: var(--text-dim);
-  }
-
-  .header-badges {
+  .brand-crest {
+    width: 38px;
+    height: 38px;
+    border-radius: var(--radius-xs);
+    background: linear-gradient(135deg, var(--gold-mythic) 0%, #b45309 100%);
     display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 16px var(--gold-glow);
+  }
+
+  .crest-accent {
+    font-family: var(--font-display);
+    font-size: 0.8rem;
+    font-weight: 900;
+    color: #05070d;
+    letter-spacing: 0.5px;
+  }
+
+  .brand-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .brand-headline {
+    display: flex;
+    align-items: center;
     gap: 0.5rem;
   }
 
-  .patch-badge {
-    font-size: 0.72rem;
-    font-weight: 700;
-    padding: 3px 10px;
-    border-radius: 20px;
-    background: rgba(245, 158, 11, 0.15);
-    color: var(--gold-accent);
-    border: 1px solid rgba(245, 158, 11, 0.3);
+  .status-live-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--emerald-live);
+    box-shadow: 0 0 8px var(--emerald-live);
   }
 
-  .db-badge {
-    font-size: 0.72rem;
+  .brand-title {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
     font-weight: 700;
-    padding: 3px 10px;
-    border-radius: 20px;
-    background: rgba(59, 130, 246, 0.15);
-    color: #93c5fd;
-    border: 1px solid rgba(59, 130, 246, 0.3);
+    letter-spacing: 1.5px;
+    color: var(--text-pure);
   }
 
-  .main-content {
-    max-width: 1400px;
+  .brand-telemetry {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+  }
+
+  .header-hud-right {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .hud-stat-pill {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: rgba(0, 0, 0, 0.45);
+    border: 1px solid var(--border-tech);
+    padding: 0.3rem 0.65rem;
+    border-radius: var(--radius-xs);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+  }
+
+  .pill-k {
+    color: var(--text-dim);
+    font-weight: 700;
+  }
+
+  .pill-v {
+    color: var(--ally-cyan);
+    font-weight: 700;
+  }
+
+  .main-viewport {
+    max-width: 1440px;
     margin: 0 auto;
     padding: 1.5rem;
     width: 100%;
     flex: 1;
   }
 
-  .dashboard-grid {
+  .split-viewport {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1.5rem;
     align-items: start;
   }
 
-  @media (max-width: 1024px) {
-    .dashboard-grid {
+  @media (max-width: 1080px) {
+    .split-viewport {
       grid-template-columns: 1fr;
     }
   }
 
-  .grid-col {
+  .viewport-col {
     display: flex;
     flex-direction: column;
   }
 
-  .placeholder-guide {
-    background: var(--bg-surface);
-    border: 1px dashed var(--border-light);
-    border-radius: var(--radius-lg);
+  .empty-dossier {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-tech);
+    border-radius: var(--radius-md);
     padding: 3rem 2rem;
     text-align: center;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 1rem;
-    color: var(--text-muted);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6);
   }
 
-  .placeholder-icon {
-    font-size: 3rem;
-    opacity: 0.5;
+  .empty-dossier-code {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--gold-mythic);
+    letter-spacing: 2px;
   }
 
-  .placeholder-guide h3 {
+  .empty-title {
+    font-family: var(--font-display);
     font-size: 1.25rem;
-    color: var(--text-main);
+    font-weight: 700;
+    color: var(--text-pure);
+    letter-spacing: 1px;
   }
 
-  .placeholder-guide p {
-    font-size: 0.88rem;
+  .empty-desc {
+    font-size: 0.85rem;
+    color: var(--text-muted);
     max-width: 440px;
     line-height: 1.5;
   }
 
-  .cta-preset-btn {
+  .preset-cta-trigger {
     margin-top: 0.5rem;
     padding: 0.65rem 1.25rem;
-    border-radius: var(--radius-md);
-    background: var(--primary-blue);
+    border-radius: var(--radius-xs);
+    background: var(--ally-blue);
     color: white;
+    font-family: var(--font-display);
     font-weight: 700;
-    font-size: 0.85rem;
-    box-shadow: 0 4px 15px var(--primary-blue-glow);
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 18px var(--ally-glow);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
   }
 
-  .cta-preset-btn:hover {
-    background: #2563eb;
+  .preset-cta-trigger:hover {
+    background: #0284c7;
     transform: translateY(-2px);
+    box-shadow: 0 6px 24px var(--ally-glow);
   }
 
-  .app-footer {
-    border-top: 1px solid var(--border-color);
-    background: rgba(10, 15, 26, 0.7);
-    padding: 1.5rem;
+  .broadcast-footer {
+    border-top: 1px solid var(--border-tech);
+    background: rgba(5, 7, 13, 0.88);
+    backdrop-filter: blur(10px);
+    padding: 1.25rem 1.75rem;
     margin-top: auto;
-    text-align: center;
   }
 
-  .footer-content {
-    max-width: 800px;
+  .footer-inner {
+    max-width: 1440px;
     margin: 0 auto;
     display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
   }
 
-  .copyright {
-    font-size: 0.8rem;
-    color: var(--text-muted);
+  .footer-legal {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
   }
 
-  .credits-text {
+  .divider {
+    opacity: 0.4;
+  }
+
+  .footer-attribution {
     font-size: 0.75rem;
     color: var(--text-dim);
-    line-height: 1.5;
   }
 
-  .credit-link {
-    color: var(--gold-accent);
+  .credit-anchor {
+    color: var(--gold-mythic);
     text-decoration: underline;
     font-weight: 600;
   }
 
-  .credit-link:hover {
-    color: #fbbf24;
+  .credit-anchor:hover {
+    color: #fef08a;
   }
 </style>
