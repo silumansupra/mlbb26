@@ -6,6 +6,8 @@
   import HeroPickerModal from './lib/HeroPickerModal.svelte';
   import BackgroundSelector from './lib/BackgroundSelector.svelte';
   import PreparationModal from './lib/PreparationModal.svelte';
+  import TeamBalanceBar from './lib/TeamBalanceBar.svelte';
+  import { exportDraftCard } from './lib/draftExporter.js';
 
   import * as engine from './lib/counterEngine.js';
 
@@ -41,9 +43,61 @@
     activeBg === 'battlefield' ? "url('/backgrounds/bg-battlefield.jpg')" : 'none'
   );
 
+  // State: Toast notification
+  let toastMessage = $state('');
+  let toastTimer = null;
+  function showToast(msg) {
+    if (toastTimer) clearTimeout(toastTimer);
+    toastMessage = msg;
+    toastTimer = setTimeout(() => {
+      toastMessage = '';
+    }, 3000);
+  }
+
   // State: My Team (5 slots) and Enemy Team (5 slots)
-  let myTeam = $state([null, null, null, null, null]);
-  let enemyTeam = $state([null, null, null, null, null]);
+  let initialBlue = [null, null, null, null, null];
+  let initialRed = [null, null, null, null, null];
+
+  // Initialize from URL params if present
+  if (typeof window !== 'undefined' && window.location.search) {
+    const params = new URLSearchParams(window.location.search);
+    const blueParam = params.get('blue');
+    const redParam = params.get('red');
+
+    if (blueParam) {
+      const names = blueParam.split(',');
+      names.slice(0, 5).forEach((n, idx) => {
+        const h = engine.getHeroByName(n.trim());
+        if (h) initialBlue[idx] = h;
+      });
+    }
+
+    if (redParam) {
+      const names = redParam.split(',');
+      names.slice(0, 5).forEach((n, idx) => {
+        const h = engine.getHeroByName(n.trim());
+        if (h) initialRed[idx] = h;
+      });
+    }
+  }
+
+  let myTeam = $state(initialBlue);
+  let enemyTeam = $state(initialRed);
+
+  // Reactive URL Synchronization
+  $effect(() => {
+    if (typeof window === 'undefined') return;
+    const blueNames = myTeam.filter(Boolean).map(h => h.hero_name.toLowerCase()).join(',');
+    const redNames = enemyTeam.filter(Boolean).map(h => h.hero_name.toLowerCase()).join(',');
+
+    const params = new URLSearchParams();
+    if (blueNames) params.set('blue', blueNames);
+    if (redNames) params.set('red', redNames);
+
+    const query = params.toString();
+    const newUrl = query ? `${window.location.pathname}?${query}` : window.location.pathname;
+    window.history.replaceState(null, '', newUrl);
+  });
 
   // Selected slot for active view in HeroDetailPanel
   let activeHeroIndex = $state(0);
@@ -81,6 +135,10 @@
   // Derived: Filtered lists of heroes
   let selectedEnemyHeroes = $derived(enemyTeam.filter(Boolean));
   let selectedMyHeroes = $derived(myTeam.filter(Boolean));
+
+  // Derived: Team Balance Compositions
+  let allyComp = $derived(engine.analyzeTeamComposition(myTeam));
+  let enemyComp = $derived(engine.analyzeTeamComposition(enemyTeam));
 
   // Derived: Active Ally Hero for Matchup Guide (defaults to Clint if none selected)
   let activeAllyHero = $derived(
@@ -191,6 +249,34 @@
     }
     myTeam = next;
   }
+
+  // Quick Action: Share Draft Link
+  function handleShareLink() {
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(window.location.href);
+      showToast('🔗 Tautan Draft berhasil disalin ke clipboard!');
+    } else {
+      showToast('Salin tautan dari address bar browser Anda.');
+    }
+  }
+
+  // Quick Action: Export Tournament Draft Card PNG
+  async function handleExportCard() {
+    showToast('📸 Menggenerate Infografis Draft PNG...');
+    try {
+      await exportDraftCard({
+        myTeam,
+        enemyTeam,
+        winrateMeta,
+        allyComp,
+        enemyComp
+      });
+      showToast('✓ Berhasil mendownload Draft Card PNG!');
+    } catch (e) {
+      console.error(e);
+      showToast('Gagal mendownload infografis draft.');
+    }
+  }
 </script>
 
 <!-- DYNAMIC WALLPAPER VIEWPORT LAYERS -->
@@ -215,6 +301,15 @@
       </div>
 
       <div class="header-hud-right">
+        <div class="header-quick-actions">
+          <button type="button" class="header-action-btn export-btn" onclick={handleExportCard} title="Export Draft Card PNG">
+            <span>📸</span> EXPORT CARD
+          </button>
+          <button type="button" class="header-action-btn share-btn" onclick={handleShareLink} title="Salin Tautan Draft">
+            <span>🔗</span> SHARE
+          </button>
+        </div>
+
         <BackgroundSelector
           currentBg={activeBg}
           onSelectBg={handleSelectBg}
@@ -247,7 +342,12 @@
       onLoadPreset={handleLoadPreset}
       onReset={handleReset}
       onOpenPreparation={handleOpenPreparation}
+      onExportCard={handleExportCard}
+      onShareLink={handleShareLink}
     />
+
+    <!-- Team Composition & Damage Balance Radar -->
+    <TeamBalanceBar {allyComp} {enemyComp} />
 
     <!-- Threat Analysis Radar -->
     <ThreatBanner threats={enemyThreats} />
@@ -268,6 +368,7 @@
           <HeroDetailPanel
             guide={matchupGuide}
             allHeroes={engine.getAllHeroes()}
+            enemyHeroes={selectedEnemyHeroes}
             customLoadout={activeAllyHero ? customLoadouts[activeAllyHero.hero_name] : null}
             onOpenPreparation={handleOpenPreparation}
             onSelectHero={(h) => inspectedHero = h}
@@ -327,6 +428,13 @@
     onClose={() => isPrepModalOpen = false}
     onSave={handleSavePreparation}
   />
+
+  <!-- Floating Toast Notification -->
+  {#if toastMessage}
+    <div class="toast-alert" role="status">
+      <span>{toastMessage}</span>
+    </div>
+  {/if}
 </div>
 
 <style>
@@ -423,6 +531,48 @@
     align-items: center;
     gap: 0.75rem;
     flex-wrap: wrap;
+  }
+
+  .header-quick-actions {
+    display: flex;
+    gap: 0.4rem;
+  }
+
+  .header-action-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-family: var(--font-display);
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 0.32rem 0.65rem;
+    border-radius: var(--radius-xs);
+    border: 1px solid var(--border-tech);
+    transition: all 0.15s ease;
+  }
+
+  .header-action-btn.export-btn {
+    background: rgba(245, 158, 11, 0.15);
+    color: var(--gold-mythic);
+    border-color: var(--gold-border);
+  }
+
+  .header-action-btn.export-btn:hover {
+    background: var(--gold-mythic);
+    color: #05070d;
+    box-shadow: 0 0 12px var(--gold-glow);
+  }
+
+  .header-action-btn.share-btn {
+    background: rgba(168, 85, 247, 0.15);
+    color: #c084fc;
+    border-color: rgba(168, 85, 247, 0.4);
+  }
+
+  .header-action-btn.share-btn:hover {
+    background: #9333ea;
+    color: white;
+    box-shadow: 0 0 12px rgba(168, 85, 247, 0.6);
   }
 
   .hud-stat-pill {
@@ -612,5 +762,35 @@
 
   .credit-anchor:hover {
     color: #fef08a;
+  }
+
+  /* FLOATING TOAST NOTIFICATION */
+  .toast-alert {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    z-index: 9999;
+    background: rgba(15, 23, 42, 0.95);
+    border: 1px solid var(--gold-mythic);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 15px rgba(245, 158, 11, 0.3);
+    color: #ffffff;
+    font-family: var(--font-display);
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 0.75rem 1.25rem;
+    border-radius: var(--radius-xs);
+    animation: toastSlide 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @keyframes toastSlide {
+    from {
+      opacity: 0;
+      transform: translateY(12px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
   }
 </style>

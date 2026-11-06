@@ -71,6 +71,34 @@ export const HERO_TRAITS = {
   ]
 };
 
+// Hero Damage Classification
+export const HERO_DAMAGE_TYPE = {
+  magic: [
+    'Aamon', 'Alice', 'Angela', 'Aurora', 'Baxia', 'Belerick', 'Carmilla', 'Cecilion',
+    "Chang'e", 'Cyclops', 'Diggie', 'Esmeralda', 'Estes', 'Eudora', 'Faramis', 'Floryn',
+    'Gatotkaca', 'Gloo', 'Gord', 'Guinevere', 'Gusion', 'Harith', 'Harley', 'Hylos',
+    'Johnson', 'Joy', 'Julian', 'Kadita', 'Kagura', 'Kaja', 'Karina', 'Kimmy', 'Lolita',
+    'Lunox', 'Luo Yi', 'Lylia', 'Mathilda', 'Minotaur', 'Natan', 'Nana', 'Novaria',
+    'Odette', 'Pharsa', 'Phoveus', 'Rafaela', 'Selena', 'Silvanna', 'Uranus', 'Vale',
+    'Valentina', 'Valir', 'Vexana', 'Xavier', 'Yve', 'Zhask', 'Zhuxin'
+  ],
+  true_damage: [
+    'Karrie', 'Lesley', 'Alpha', 'X.Borg', 'Martis'
+  ]
+};
+
+export const EARLY_GAME_HEROES = [
+  'Selena', 'Franco', 'Hilda', 'Grock', 'Jawhead', 'Fanny', 'Martis', 'Dyrroth',
+  'Thamuz', 'Valir', 'Luo Yi', 'Chou', 'Paquito', 'Mathilda', 'Joy', 'Nolan',
+  'Yu Zhong', 'Terizla', 'Khaleed', 'Saber', 'Helcurt'
+];
+
+export const LATE_GAME_HEROES = [
+  'Miya', 'Layla', 'Claude', 'Moskov', 'Wanwan', 'Lesley', 'Cecilion', 'Aldous',
+  'Aulus', 'Xavier', 'Lunox', 'Natan', 'Irithel', 'Hanabi', 'Bruno', 'Melissa',
+  'Karrie', 'Alice'
+];
+
 // Lane mapping normalization
 export function normalizeLane(hero) {
   const laning = (hero.laning || []).join(', ').toLowerCase();
@@ -564,4 +592,302 @@ export function getHeroMatchupGuide(hero, enemyHeroes = []) {
     threats,
     tips
   };
+}
+
+// 4. Team Composition & Balance Analyzer
+export function analyzeTeamComposition(teamHeroes) {
+  const activeHeroes = (teamHeroes || []).filter(Boolean);
+  if (activeHeroes.length === 0) return null;
+
+  let physicalCount = 0;
+  let magicCount = 0;
+  let trueDamageCount = 0;
+
+  let frontlineCount = 0;
+  let ccCount = 0;
+  let earlyGameCount = 0;
+  let lateGameCount = 0;
+
+  activeHeroes.forEach(hero => {
+    const name = hero.hero_name;
+    const cls = (hero.class || '').toLowerCase();
+
+    if (HERO_DAMAGE_TYPE.true_damage.includes(name)) {
+      trueDamageCount += 1;
+      physicalCount += 0.5;
+    } else if (HERO_DAMAGE_TYPE.magic.includes(name)) {
+      magicCount += 1;
+    } else {
+      physicalCount += 1;
+    }
+
+    if (
+      cls.includes('tank') ||
+      HERO_TRAITS.high_hp_tank.includes(name) ||
+      ['Terizla', 'Yu Zhong', 'Ruby', 'Thamuz', 'Hilda', 'Fredrinn', 'Barats', 'Edith', 'Masha'].includes(name)
+    ) {
+      frontlineCount += 1;
+    }
+
+    if (HERO_TRAITS.heavy_cc.includes(name)) {
+      ccCount += 1;
+    }
+
+    if (EARLY_GAME_HEROES.includes(name)) earlyGameCount += 1;
+    if (LATE_GAME_HEROES.includes(name)) lateGameCount += 1;
+  });
+
+  const totalDmgWeight = (physicalCount + magicCount + trueDamageCount) || 1;
+  const physPct = Math.round((physicalCount / totalDmgWeight) * 100);
+  const magicPct = Math.round((magicCount / totalDmgWeight) * 100);
+  const truePct = Math.max(0, 100 - physPct - magicPct);
+
+  const warnings = [];
+  const strengths = [];
+
+  if (activeHeroes.length >= 3) {
+    if (magicCount === 0) {
+      warnings.push({
+        id: 'no_magic',
+        severity: 'CRITICAL',
+        title: '100% Physical Damage (Tanpa Magic)',
+        description: 'Musuh sangat mudah stacking armor (Blade Armor + Antique Cuirass). Pertimbangkan menambah Mage/Magic dealer!'
+      });
+    } else if (physicalCount === 0 && activeHeroes.length >= 4) {
+      warnings.push({
+        id: 'no_physical',
+        severity: 'CRITICAL',
+        title: '100% Magic Damage (Tanpa Fisik)',
+        description: "Lawan cukup membeli Athena's Shield + Radiant Armor untuk meredam hampir seluruh damage tim."
+      });
+    }
+
+    if (frontlineCount === 0 && activeHeroes.length >= 3) {
+      warnings.push({
+        id: 'no_frontline',
+        severity: 'HIGH',
+        title: 'Tanpa Frontline / Badan Tebal',
+        description: 'Seluruh anggota tim squishy. Sangat rentan di-dive oleh Assassin atau ditarik inisiator lawan.'
+      });
+    }
+
+    if (ccCount === 0 && activeHeroes.length >= 3) {
+      warnings.push({
+        id: 'no_cc',
+        severity: 'HIGH',
+        title: 'Minim Crowd Control (Hard Stun)',
+        description: 'Tidak ada hard stun / lock rantai untuk menghentikan hero lincah (Fanny, Ling, Joy, Harith).'
+      });
+    }
+
+    if (lateGameCount >= 3) {
+      warnings.push({
+        id: 'heavy_late',
+        severity: 'MEDIUM',
+        title: 'Komposisi Sangat Late Game',
+        description: 'Early game (menit 1-6) lemah. Main aman dan jangan terburu-buru kontes objektif berisiko.'
+      });
+    } else if (earlyGameCount >= 3 && lateGameCount === 0 && activeHeroes.length >= 4) {
+      warnings.push({
+        id: 'heavy_early',
+        severity: 'MEDIUM',
+        title: 'Komposisi Early Rush',
+        description: 'Harus mendominasi dan akhiri sebelum menit 14 sebelum scaling hero musuh melampaui tim.'
+      });
+    }
+  }
+
+  if (magicCount >= 1 && physicalCount >= 1) {
+    strengths.push('Damage Hybrid Seimbang (Fisik + Magic)');
+  }
+  if (frontlineCount >= 1 && ccCount >= 1) {
+    strengths.push('Setup Frontline & Inisiasi CC Solid');
+  }
+  if (activeHeroes.length === 5 && warnings.length === 0) {
+    strengths.push('Komposisi Ideal Siap Tempur!');
+  }
+
+  return {
+    heroCount: activeHeroes.length,
+    damageSplit: {
+      physical: physPct,
+      magic: magicPct,
+      trueDamage: truePct
+    },
+    frontlineCount,
+    ccCount,
+    earlyGameCount,
+    lateGameCount,
+    warnings,
+    strengths
+  };
+}
+
+// 5. 1v1 Laning Matchup Guide
+export function getLaneMatchup(allyHero, enemyHero, lane = 'Gold Lane') {
+  if (!allyHero || !enemyHero) return null;
+
+  const allyName = allyHero.hero_name;
+  const enemyName = enemyHero.hero_name;
+
+  let advantage = 'EVEN'; // 'ADVANTAGE' | 'EVEN' | 'DISADVANTAGE'
+  let score = 0;
+  const analysisPoints = [];
+
+  // 1. Direct counter relationship check
+  const allyWeakAgainst = (allyHero.relations?.weak_against?.heroids || []);
+  const allyStrongAgainst = (allyHero.relations?.strong_against?.heroids || []);
+  const enemyWeakAgainst = (enemyHero.relations?.weak_against?.heroids || []);
+  const enemyStrongAgainst = (enemyHero.relations?.strong_against?.heroids || []);
+
+  if (allyHero.mlid && enemyWeakAgainst.includes(parseInt(allyHero.mlid))) {
+    score += 3;
+    analysisPoints.push(`${allyName} adalah counter resmi dari ${enemyName}.`);
+  }
+  if (enemyHero.mlid && allyStrongAgainst.includes(parseInt(enemyHero.mlid))) {
+    score += 2;
+    analysisPoints.push(`Keahlian spesifik ${allyName} mengungguli ${enemyName}.`);
+  }
+  if (enemyHero.mlid && allyWeakAgainst.includes(parseInt(enemyHero.mlid))) {
+    score -= 3;
+    analysisPoints.push(`${allyName} lemah secara alami berhadapan dengan ${enemyName}.`);
+  }
+  if (allyHero.mlid && enemyStrongAgainst.includes(parseInt(allyHero.mlid))) {
+    score -= 2;
+    analysisPoints.push(`${enemyName} memiliki kit yang menekan ${allyName}.`);
+  }
+
+  // 2. Early Level 1-3 Power Spike Evaluation
+  const allyIsEarly = EARLY_GAME_HEROES.includes(allyName);
+  const enemyIsEarly = EARLY_GAME_HEROES.includes(enemyName);
+  const allyIsLate = LATE_GAME_HEROES.includes(allyName);
+  const enemyIsLate = LATE_GAME_HEROES.includes(enemyName);
+
+  let earlySpikeVerdict = '';
+  if (allyIsEarly && !enemyIsEarly) {
+    score += 2;
+    earlySpikeVerdict = `${allyName} memiliki keunggulan power spike kuat di Level 1-3. Main agresif dan tekan minion gold!`;
+  } else if (!allyIsEarly && enemyIsEarly) {
+    score -= 2;
+    earlySpikeVerdict = `Waspada! ${enemyName} sangat berbahaya di Level 1-3. Jangan adu trade pukulan langsung sebelum punya skill kabur.`;
+  } else if (allyIsLate && !enemyIsLate) {
+    earlySpikeVerdict = `${allyName} butuh farming item core. Fokus last-hit minion dan amankan siege minion di bawah tower.`;
+  } else {
+    earlySpikeVerdict = `Kekuatan Level 1-3 relatif seimbang. Pemenang laning ditentukan oleh spacing dan positioning.`;
+  }
+
+  // 3. Recommended Wave Strategy
+  let waveStrategy = 'POKE_AND_BAIT';
+  let strategyText = '';
+
+  if (score > 1) {
+    advantage = 'ADVANTAGE';
+    waveStrategy = 'FAST_CLEAR_ROTATE';
+    strategyText = `Manfaatkan dominasi laning: Habisi minion cepat, cicil HP ${enemyName}, lalu segera rotasi bantu Turtle / Mid.`;
+  } else if (score < -1) {
+    advantage = 'DISADVANTAGE';
+    waveStrategy = 'FREEZE_WAVE';
+    strategyText = `Tahan minion dekat tower Anda (Freeze Wave). Jangan overextend dan tunggu roamer/jungler melakukan gank.`;
+  } else {
+    advantage = 'EVEN';
+    waveStrategy = 'POKE_AND_BAIT';
+    strategyText = `Fokus poke dari jarak aman saat ${enemyName} mengambil last-hit minion. Hindari commit all-in tanpa info posisi roamer musuh.`;
+  }
+
+  return {
+    ally: allyHero,
+    enemy: enemyHero,
+    lane,
+    advantage,
+    score,
+    earlySpikeVerdict,
+    waveStrategy,
+    strategyText,
+    analysisPoints
+  };
+}
+
+// 6. Interactive Situational Item Swap Simulator
+export const SITUATIONAL_ITEM_TRIGGERS = [
+  {
+    id: 'athena_shield',
+    name: "Musuh Beli Athena's Shield",
+    icon: '/items/athenas_shield.png',
+    description: 'Musuh memperoleh 25% Magic Damage Reduction selama 3 detik.',
+    appliesTo: ['Mage', 'Assassin', 'Marksman'],
+    suggestion: {
+      swapIn: 'Divine Glaive',
+      replaces: 'Genius Wand',
+      reason: "Magic RES tebal dari Athena membuat flat PEN Genius Wand tidak efektif. Divine Glaive memberi +40% Magic PEN persentase untuk menembus shield."
+    }
+  },
+  {
+    id: 'radiant_armor',
+    name: 'Musuh Beli Radiant Armor',
+    icon: '/items/radiant_armor.png',
+    description: 'Musuh meredam Magic Damage bertahap (continuous poke) hingga 6 stack.',
+    appliesTo: ['Mage'],
+    suggestion: {
+      swapIn: 'Holy Crystal',
+      replaces: 'Glowing Wand',
+      reason: "Glowing Wand memicu stack Radiant musuh makin tebal. Ganti ke Raw Magic Power tinggi (Holy Crystal / Blood Wings) untuk one-shot burst."
+    }
+  },
+  {
+    id: 'blade_armor',
+    name: 'Musuh Beli Blade Armor',
+    icon: '/items/blade_armor.png',
+    description: 'Musuh memantulkan 30% Basic Attack fisik dan meredam 20% Critical Damage.',
+    appliesTo: ['Marksman', 'Fighter', 'Assassin'],
+    suggestion: {
+      swapIn: 'Demon Hunter Sword',
+      replaces: "Berserker's Fury",
+      reason: "Blade Armor meng-counter Critical build. Ganti dengan Demon Hunter Sword (DHS) + Malefic Roar untuk True % Current HP damage."
+    }
+  },
+  {
+    id: 'high_regen_enemy',
+    name: 'Musuh High Regen / Estes / Floryn',
+    icon: '/items/sea_halberd.png',
+    description: 'Regen dan lifesteal musuh terlalu deras di setiap teamfight.',
+    appliesTo: ['Marksman', 'Fighter', 'Mage', 'Tank'],
+    suggestion: {
+      swapIn: 'Sea Halberd',
+      replaces: 'Slot Item 2 / 3',
+      reason: "Wajib percepat item Anti-Heal (Sea Halberd / Dominance Ice / Glowing Wand) memotong 50% HP regen musuh seketika."
+    }
+  },
+  {
+    id: 'wind_of_nature',
+    name: 'Musuh Beli Wind of Nature (WoN)',
+    icon: '/items/wind_of_nature.png',
+    description: 'Marksman musuh memiliki kekebalan Physical Damage selama 2 detik penuh.',
+    appliesTo: ['Marksman', 'Assassin'],
+    suggestion: {
+      swapIn: 'Rose Gold Meteor',
+      replaces: 'Boots / Late Item',
+      reason: "Jangan buang skill pamungkas saat WoN menyala. Siapkan Rose Gold Meteor untuk shield darurat saat terkena trade balik."
+    }
+  },
+  {
+    id: 'immortality_switch',
+    name: 'Cadangan Late-Game (Winter / Immortality)',
+    icon: '/items/immortality.png',
+    description: 'Situasi late game perebutan Lord krusial (menit 15+).',
+    appliesTo: ['All'],
+    suggestion: {
+      swapIn: 'Winter Crown',
+      replaces: 'Immortality (setelah pecah)',
+      reason: "Trik pro: Setelah pasif Immortality pecah (cooldown 210 detik), jual dan langsung beli Winter Crown untuk 2 detik invulnerable tambahan!"
+    }
+  }
+];
+
+export function getSituationalSwaps(hero) {
+  if (!hero) return SITUATIONAL_ITEM_TRIGGERS;
+  const cls = (hero.class || '').toLowerCase();
+  return SITUATIONAL_ITEM_TRIGGERS.filter(trigger => {
+    if (trigger.appliesTo.includes('All')) return true;
+    return trigger.appliesTo.some(c => cls.includes(c.toLowerCase()));
+  });
 }

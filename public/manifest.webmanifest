@@ -1,0 +1,24 @@
+{
+  "name": "MLBB Tactical Draft & Counter Intelligence",
+  "short_name": "MLBB Draft",
+  "description": "Tactical Draft Pick & Adaptive Counter Intelligence for Mobile Legends: Bang Bang",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#040711",
+  "theme_color": "#0ea5e9",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/items/blade_of_despair.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/items/immortality.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -4,10 +4,35 @@
   let {
     guide = null,
     allHeroes = [],
+    enemyHeroes = [],
     customLoadout = null,
     onOpenPreparation,
     onSelectHero
   } = $props();
+
+  let selectedEnemyHeroName = $state('');
+  let activeSituationalTrigger = $state(null);
+
+  // Auto-detect laning partner if none selected
+  let laningOpponent = $derived.by(() => {
+    if (!enemyHeroes || enemyHeroes.length === 0) return null;
+    if (selectedEnemyHeroName) {
+      return enemyHeroes.find(h => h.hero_name === selectedEnemyHeroName) || enemyHeroes[0];
+    }
+    const myLane = engine.normalizeLane(guide?.hero);
+    const sameLaneEnemy = enemyHeroes.find(h => engine.normalizeLane(h) === myLane);
+    return sameLaneEnemy || enemyHeroes[0];
+  });
+
+  let laneMatchup = $derived(
+    guide?.hero && laningOpponent
+      ? engine.getLaneMatchup(guide.hero, laningOpponent, engine.normalizeLane(guide.hero))
+      : null
+  );
+
+  let situationalSwaps = $derived(
+    guide?.hero ? engine.getSituationalSwaps(guide.hero) : []
+  );
 
   function handleHeroChange(e) {
     const name = e.target.value;
@@ -285,6 +310,133 @@
         {/each}
       </div>
     </div>
+
+    <!-- SITUATIONAL ITEM SWAP SIMULATOR -->
+    <div class="sub-cell item-swap-simulator">
+      <div class="cell-head">
+        <span class="cell-tag">IN-GAME ADAPTIVE PROTOCOL</span>
+        <h4 class="cell-title">SITUATIONAL ITEM SWAP SIMULATOR</h4>
+      </div>
+      <p class="swap-desc">
+        Musuh mulai membeli item pertahanan spesifik saat in-game? Klik skenario berikut untuk melihat rekomendasi item adaptif:
+      </p>
+
+      <div class="swap-triggers-grid">
+        {#each situationalSwaps as trigger}
+          <button
+            type="button"
+            class="trigger-chip"
+            class:is-active={activeSituationalTrigger?.id === trigger.id}
+            onclick={() => {
+              activeSituationalTrigger = activeSituationalTrigger?.id === trigger.id ? null : trigger;
+            }}
+          >
+            <img src={trigger.icon} alt={trigger.name} class="chip-ic" onerror={(e) => { e.target.style.display = 'none'; }} />
+            <span>{trigger.name}</span>
+          </button>
+        {/each}
+      </div>
+
+      {#if activeSituationalTrigger}
+        <div class="swap-result-box tech-bracket">
+          <div class="swap-head">
+            <span class="swap-badge">REKOMENDASI ADAPTASI ITEM</span>
+            <span class="swap-trigger-name">{activeSituationalTrigger.name}</span>
+          </div>
+
+          <div class="swap-flow-row">
+            <div class="swap-node replace-node">
+              <span class="swap-label">GANTI ITEM INI:</span>
+              <span class="swap-val-tag">{activeSituationalTrigger.suggestion.replaces}</span>
+            </div>
+            <div class="swap-arrow">➔</div>
+            <div class="swap-node in-node">
+              <span class="swap-label">DENGAN ITEM INI:</span>
+              <div class="item-reco-row">
+                <img src={engine.getItemIcon(activeSituationalTrigger.suggestion.swapIn)} alt="" class="reco-item-img" />
+                <span class="swap-val-tag reco-name">{activeSituationalTrigger.suggestion.swapIn}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="swap-reason-box">
+            <span class="reason-prefix">ALASAN TAKTIS:</span>
+            <p class="reason-content">{activeSituationalTrigger.suggestion.reason}</p>
+          </div>
+        </div>
+      {/if}
+    </div>
+
+    <!-- 1V1 LANING MATCHUP GUIDE -->
+    {#if laneMatchup}
+      <div class="sub-cell laning-matchup-cell">
+        <div class="cell-head between-head">
+          <div>
+            <span class="cell-tag">1V1 MICRO DIRECTIVE</span>
+            <h4 class="cell-title">1V1 LANING MATCHUP ({laneMatchup.lane.toUpperCase()})</h4>
+          </div>
+
+          {#if enemyHeroes && enemyHeroes.length > 1}
+            <div class="enemy-select-inline">
+              <label for="enemy-lane-opponent" class="enemy-select-lbl">DUEL VS:</label>
+              <select id="enemy-lane-opponent" class="enemy-dropdown" bind:value={selectedEnemyHeroName}>
+                {#each enemyHeroes as eh}
+                  <option value={eh.hero_name}>{eh.hero_name} ({eh.class})</option>
+                {/each}
+              </select>
+            </div>
+          {/if}
+        </div>
+
+        <div class="laning-dossier-card">
+          <div class="duel-profiles-row">
+            <div class="duel-hero ally-duel">
+              <img src={guide.hero.portrait || '/default-hero.webp'} alt={guide.hero.hero_name} class="duel-art" />
+              <div class="duel-info">
+                <span class="duel-name">{guide.hero.hero_name}</span>
+                <span class="duel-side">ALLY</span>
+              </div>
+            </div>
+
+            <div class="duel-verdict-box">
+              <span class="verdict-tag verdict-{laneMatchup.advantage.toLowerCase()}">
+                {laneMatchup.advantage === 'ADVANTAGE' ? 'UNGGUL LANING' : laneMatchup.advantage === 'DISADVANTAGE' ? 'WASPADA LANING' : 'LANING SEIMBANG'}
+              </span>
+              <span class="verdict-strategy">STRATEGI: {laneMatchup.waveStrategy.replace(/_/g, ' ')}</span>
+            </div>
+
+            <div class="duel-hero enemy-duel">
+              <img src={laneMatchup.enemy.portrait || '/default-hero.webp'} alt={laneMatchup.enemy.hero_name} class="duel-art" />
+              <div class="duel-info enemy-info">
+                <span class="duel-name">{laneMatchup.enemy.hero_name}</span>
+                <span class="duel-side enemy-side">OPPONENT</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="spike-box">
+            <span class="spike-header">⚡ ANALISIS POWER SPIKE LEVEL 1-3:</span>
+            <p class="spike-text">{laneMatchup.earlySpikeVerdict}</p>
+          </div>
+
+          <div class="strategy-box">
+            <span class="strategy-header">🛡️ PANDUAN WAVE MINION & ROTASI:</span>
+            <p class="strategy-text">{laneMatchup.strategyText}</p>
+          </div>
+
+          {#if laneMatchup.analysisPoints.length > 0}
+            <div class="tactical-notes-list">
+              {#each laneMatchup.analysisPoints as pt}
+                <div class="tactical-note-item">
+                  <span class="bullet">//</span>
+                  <span>{pt}</span>
+                </div>
+              {/each}
+            </div>
+          {/if}
+        </div>
+      </div>
+    {/if}
 
     <!-- 4. COMBAT DIRECTIVES -->
     {#if guide.tips && guide.tips.length > 0}
@@ -1050,5 +1202,349 @@
     font-size: 0.8rem;
     color: #fecdd3;
     line-height: 1.4;
+  }
+
+  /* ITEM SWAP SIMULATOR */
+  .item-swap-simulator {
+    border-color: rgba(245, 158, 11, 0.35);
+    background: rgba(15, 23, 42, 0.4);
+  }
+
+  .swap-desc {
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    margin-bottom: 0.85rem;
+    line-height: 1.4;
+  }
+
+  .swap-triggers-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.85rem;
+  }
+
+  .trigger-chip {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    background: rgba(0, 0, 0, 0.45);
+    border: 1px solid var(--border-tech);
+    padding: 0.35rem 0.65rem;
+    border-radius: var(--radius-xs);
+    font-family: var(--font-display);
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--text-dim);
+    transition: all 0.15s ease;
+  }
+
+  .trigger-chip:hover {
+    color: var(--text-pure);
+    border-color: var(--border-tech-bright);
+    transform: translateY(-1px);
+  }
+
+  .trigger-chip.is-active {
+    background: rgba(245, 158, 11, 0.2);
+    border-color: var(--gold-mythic);
+    color: #fef08a;
+    box-shadow: 0 0 10px rgba(245, 158, 11, 0.3);
+  }
+
+  .chip-ic {
+    width: 18px;
+    height: 18px;
+    border-radius: 2px;
+    object-fit: cover;
+  }
+
+  .swap-result-box {
+    background: rgba(0, 0, 0, 0.55);
+    border: 1px solid var(--gold-border);
+    border-radius: var(--radius-xs);
+    padding: 0.85rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    animation: fadeIn 0.2s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .swap-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding-bottom: 0.45rem;
+  }
+
+  .swap-badge {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    font-weight: 700;
+    color: var(--gold-mythic);
+    letter-spacing: 0.5px;
+  }
+
+  .swap-trigger-name {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    color: #e2e8f0;
+  }
+
+  .swap-flow-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .swap-node {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .swap-label {
+    font-family: var(--font-mono);
+    font-size: 0.58rem;
+    color: var(--text-dim);
+    letter-spacing: 0.5px;
+  }
+
+  .swap-val-tag {
+    font-family: var(--font-display);
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #fca5a5;
+  }
+
+  .swap-arrow {
+    color: var(--gold-mythic);
+    font-size: 1.1rem;
+    font-weight: bold;
+  }
+
+  .item-reco-row {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+  }
+
+  .reco-item-img {
+    width: 26px;
+    height: 26px;
+    border-radius: 4px;
+    border: 1px solid var(--gold-mythic);
+  }
+
+  .reco-name {
+    color: #4ade80;
+  }
+
+  .swap-reason-box {
+    background: rgba(255, 255, 255, 0.03);
+    border-left: 3px solid var(--gold-mythic);
+    padding: 0.5rem 0.75rem;
+    border-radius: 0 4px 4px 0;
+  }
+
+  .reason-prefix {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: var(--gold-mythic);
+    letter-spacing: 0.5px;
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  .reason-content {
+    font-size: 0.78rem;
+    color: #e2e8f0;
+    line-height: 1.4;
+  }
+
+  /* 1V1 LANING MATCHUP CELL */
+  .laning-matchup-cell {
+    border-color: rgba(56, 189, 248, 0.35);
+  }
+
+  .enemy-select-inline {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .enemy-select-lbl {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    color: var(--text-dim);
+    font-weight: 700;
+  }
+
+  .enemy-dropdown {
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--enemy-border);
+    color: var(--text-pure);
+    font-family: var(--font-display);
+    font-size: 0.75rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: var(--radius-xs);
+    outline: none;
+  }
+
+  .laning-dossier-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+
+  .duel-profiles-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--border-tech);
+    border-radius: var(--radius-xs);
+    padding: 0.75rem 1rem;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .duel-hero {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+  }
+
+  .duel-art {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-xs);
+    object-fit: cover;
+    border: 1.5px solid var(--border-tech);
+  }
+
+  .ally-duel .duel-art {
+    border-color: var(--ally-cyan);
+  }
+
+  .enemy-duel .duel-art {
+    border-color: var(--enemy-crimson);
+  }
+
+  .duel-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .duel-name {
+    font-family: var(--font-display);
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-pure);
+  }
+
+  .duel-side {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: var(--ally-cyan);
+    letter-spacing: 0.5px;
+  }
+
+  .enemy-side {
+    color: var(--enemy-crimson);
+  }
+
+  .duel-verdict-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .verdict-tag {
+    font-family: var(--font-display);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-xs);
+  }
+
+  .verdict-advantage {
+    background: rgba(34, 197, 94, 0.2);
+    color: #4ade80;
+    border: 1px solid rgba(74, 222, 128, 0.5);
+  }
+
+  .verdict-even {
+    background: rgba(56, 189, 248, 0.2);
+    color: #38bdf8;
+    border: 1px solid rgba(56, 189, 248, 0.5);
+  }
+
+  .verdict-disadvantage {
+    background: rgba(244, 63, 94, 0.2);
+    color: #fb7185;
+    border: 1px solid rgba(244, 63, 94, 0.5);
+  }
+
+  .verdict-strategy {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    color: var(--gold-mythic);
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+
+  .spike-box, .strategy-box {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: var(--radius-xs);
+    padding: 0.6rem 0.85rem;
+    border: 1px solid var(--border-tech);
+  }
+
+  .spike-header, .strategy-header {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    font-weight: 700;
+    color: var(--gold-mythic);
+    letter-spacing: 0.5px;
+    display: block;
+    margin-bottom: 0.25rem;
+  }
+
+  .spike-text, .strategy-text {
+    font-size: 0.8rem;
+    color: #e2e8f0;
+    line-height: 1.4;
+  }
+
+  .tactical-notes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .tactical-note-item {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    display: flex;
+    gap: 0.4rem;
+  }
+
+  .bullet {
+    color: var(--ally-cyan);
+    font-family: var(--font-mono);
+    font-weight: bold;
   }
 </style>

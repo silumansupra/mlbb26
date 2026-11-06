@@ -10,7 +10,9 @@
     onRemoveHero,
     onLoadPreset,
     onReset,
-    onOpenPreparation
+    onOpenPreparation,
+    onExportCard,
+    onShareLink
   } = $props();
 
   const laneLabels = ['GOLD LANE', 'EXP LANE', 'MID LANE', 'ROAM', 'JUNGLE'];
@@ -155,8 +157,18 @@
     </div>
 
     <div class="tactical-actions">
+      {#if onExportCard}
+        <button type="button" class="action-trigger export-trigger" onclick={onExportCard} title="Download gambar infografis draft PNG turnamen">
+          <span class="trigger-label">📸 EXPORT CARD</span>
+        </button>
+      {/if}
+      {#if onShareLink}
+        <button type="button" class="action-trigger share-trigger" onclick={onShareLink} title="Salin link draft ini ke clipboard">
+          <span class="trigger-label">🔗 SHARE LINK</span>
+        </button>
+      {/if}
       <button type="button" class="action-trigger preset-trigger" onclick={onLoadPreset} title="Muat kasus musuh: Tigreal, Aamon, Cici, Badang">
-        <span class="trigger-label">PRESET MATCHUP</span>
+        <span class="trigger-label">PRESET MATCH</span>
       </button>
       <button type="button" class="action-trigger reset-trigger" onclick={onReset} title="Kosongkan seluruh draft">
         <span class="trigger-label">RESET ALL</span>
@@ -704,6 +716,30 @@
     align-items: center;
     justify-content: center;
     transition: all 0.15s ease;
+  }
+
+  .export-trigger {
+    background: rgba(245, 158, 11, 0.15);
+    color: var(--gold-mythic);
+    border: 1px solid var(--gold-border);
+  }
+
+  .export-trigger:hover {
+    background: var(--gold-mythic);
+    color: #05070d;
+    box-shadow: 0 0 16px var(--gold-glow);
+  }
+
+  .share-trigger {
+    background: rgba(168, 85, 247, 0.15);
+    color: #c084fc;
+    border: 1px solid rgba(168, 85, 247, 0.4);
+  }
+
+  .share-trigger:hover {
+    background: #9333ea;
+    color: white;
+    box-shadow: 0 0 16px rgba(168, 85, 247, 0.6);
   }
 
   .preset-trigger {
