@@ -3,9 +3,9 @@
 :root {
   /* Core Obsidian Palette */
   --bg-deep: #05070d;
-  --bg-panel: rgba(11, 16, 28, 0.82);
-  --bg-card: rgba(16, 24, 40, 0.75);
-  --bg-card-hover: rgba(22, 33, 56, 0.88);
+  --bg-panel: rgba(9, 14, 25, 0.68);
+  --bg-card: rgba(14, 21, 38, 0.6);
+  --bg-card-hover: rgba(22, 33, 56, 0.8);
   --bg-elevated: #111a2e;
 
   /* Tactical Tournament Colors */
@@ -67,23 +67,39 @@ body {
 /* Background Artwork Overlay System */
 .bg-viewport-layer {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
   background-size: cover;
   background-position: center center;
   background-repeat: no-repeat;
+  background-attachment: fixed;
   z-index: -2;
-  transition: background-image 0.5s ease-in-out;
+  transition: background-image 0.4s ease-in-out;
 }
 
 .bg-scrim-layer {
   position: fixed;
-  inset: 0;
-  background: 
-    radial-gradient(ellipse at 50% 0%, rgba(5, 8, 16, 0.72) 0%, rgba(5, 7, 13, 0.94) 75%),
-    linear-gradient(180deg, rgba(5, 7, 13, 0.65) 0%, rgba(5, 7, 13, 0.96) 100%);
-  backdrop-filter: blur(8px);
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
   z-index: -1;
   pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.bg-scrim-layer.scrim-vivid {
+  background: 
+    radial-gradient(ellipse at 50% 30%, rgba(5, 7, 13, 0.15) 0%, rgba(5, 7, 13, 0.45) 100%),
+    linear-gradient(180deg, rgba(5, 7, 13, 0.1) 0%, rgba(5, 7, 13, 0.5) 100%);
+}
+
+.bg-scrim-layer.scrim-dim {
+  background: 
+    radial-gradient(ellipse at 50% 30%, rgba(5, 7, 13, 0.4) 0%, rgba(5, 7, 13, 0.75) 100%),
+    linear-gradient(180deg, rgba(5, 7, 13, 0.3) 0%, rgba(5, 7, 13, 0.8) 100%);
 }
 
 /* Tactical Tech Accents */

@@ -12,10 +12,20 @@
   const savedBg = typeof localStorage !== 'undefined' ? localStorage.getItem('mlbb_draft_bg') : null;
   let activeBg = $state(savedBg || 'abyss');
 
+  const savedVivid = typeof localStorage !== 'undefined' ? localStorage.getItem('mlbb_draft_vivid') : null;
+  let isVivid = $state(savedVivid !== null ? savedVivid === 'true' : true);
+
   function handleSelectBg(bgId) {
     activeBg = bgId;
     if (typeof localStorage !== 'undefined') {
       localStorage.setItem('mlbb_draft_bg', bgId);
+    }
+  }
+
+  function handleToggleVivid() {
+    isVivid = !isVivid;
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('mlbb_draft_vivid', String(isVivid));
     }
   }
 
@@ -113,7 +123,7 @@
     const aamon = engine.getHeroByName('Aamon');
     const cici = engine.getHeroByName('Cici');
     const badang = engine.getHeroByName('Badang');
-    
+
     enemyTeam = [tigreal, aamon, cici, badang, null];
 
     // Suggest Clint in Gold Lane if empty
@@ -146,8 +156,8 @@
 </script>
 
 <!-- DYNAMIC WALLPAPER VIEWPORT LAYERS -->
-<div class="bg-viewport-layer" style:background-image={bgStyleUrl}></div>
-<div class="bg-scrim-layer"></div>
+<div class="bg-viewport-layer" style="background-image: {bgStyleUrl};"></div>
+<div class="bg-scrim-layer" class:scrim-vivid={isVivid} class:scrim-dim={!isVivid}></div>
 
 <div class="broadcast-shell">
   <!-- TOP TOURNAMENT STATUS HUD -->
@@ -170,6 +180,8 @@
         <BackgroundSelector
           currentBg={activeBg}
           onSelectBg={handleSelectBg}
+          {isVivid}
+          onToggleVivid={handleToggleVivid}
         />
         <div class="hud-stat-pill">
           <span class="pill-k">DB:</span>
@@ -212,7 +224,7 @@
         {:else}
           <div class="empty-dossier tech-bracket">
             <span class="empty-dossier-code">AWAITING_ACTIVE_HERO_SELECTION</span>
-            <h3 class="empty-title">PILOH HERO PADA TIM ALLY</h3>
+            <h3 class="empty-title">PILIH HERO TIM ALLY</h3>
             <p class="empty-desc">
               Pilih salah satu hero di slot <strong>Ally Roster</strong> (misal: Clint / Brody) untuk mengaktifkan kalkulasi konsol taktis: <strong>Battle Spell</strong>, <strong>Emblem Matrix</strong>, dan <strong>6 Item Counter Adaptif</strong>.
             </p>

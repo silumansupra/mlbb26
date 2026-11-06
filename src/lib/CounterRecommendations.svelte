@@ -87,6 +87,7 @@
 <style>
   .scout-console {
     background: var(--bg-panel);
+    backdrop-filter: blur(14px);
     border: 1px solid var(--border-tech);
     border-radius: var(--radius-md);
     padding: 1.25rem 1.5rem;
