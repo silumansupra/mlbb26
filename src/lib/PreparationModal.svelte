@@ -1,4 +1,5 @@
 <script>
+  import { untrack } from 'svelte';
   import * as engine from './counterEngine.js';
 
   let {
@@ -13,11 +14,6 @@
 
   // Active Tab: 'build' | 'emblem' | 'spell'
   let activeTab = $state('build');
-  $effect(() => {
-    if (initialTab) {
-      activeTab = initialTab;
-    }
-  });
 
   // Load hero default or current custom loadout
   let activeBuild = $state([]);
@@ -39,32 +35,57 @@
   const allEmblems = engine.getAllEmblems();
   const allTalents = engine.getAllTalents();
 
-  // When hero changes or modal opens, initialize loadout
+  // Keep track of the last hero loaded to avoid unnecessary re-initializations
+  let lastHeroName = null;
+  let wasOpen = false;
+
+  // When hero changes or modal opens, initialize loadout safely inside untrack()
   $effect(() => {
-    if (hero) {
-      if (customLoadout) {
-        activeBuild = [...(customLoadout.items || [])];
-        activeEmblem = customLoadout.emblem?.base || 'Common';
-        activeTier1 = customLoadout.emblem?.tier1?.name || customLoadout.emblem?.tier1 || 'Thrill';
-        activeTier2 = customLoadout.emblem?.tier2?.name || customLoadout.emblem?.tier2 || 'Master Assassin';
-        activeTier3 = customLoadout.emblem?.tier3?.name || customLoadout.emblem?.tier3 || 'Killing Spree';
-        activeSpell = customLoadout.spell?.name || customLoadout.spell?.id || 'Flicker';
-      } else {
-        const guide = engine.getHeroMatchupGuide(hero, enemyHeroes);
-        activeBuild = guide ? guide.build.map(b => b.name) : [];
-        activeEmblem = guide?.emblem?.name || 'Common';
-        activeTier1 = guide?.emblem?.tier1 || 'Thrill';
-        activeTier2 = guide?.emblem?.tier2 || 'Master Assassin';
-        activeTier3 = guide?.emblem?.tier3 || 'Killing Spree';
-        activeSpell = guide?.battleSpell?.name || 'Flicker';
+    const isModalOpen = isOpen;
+    const heroName = hero?.hero_name;
+    const tab = initialTab;
+
+    if (isModalOpen && heroName) {
+      if (!wasOpen || heroName !== lastHeroName) {
+        lastHeroName = heroName;
+        wasOpen = true;
+
+        untrack(() => {
+          activeTab = tab || 'build';
+
+          let items = [];
+          if (customLoadout?.items?.length) {
+            items = [...customLoadout.items];
+            activeEmblem = customLoadout.emblem?.base || 'Common';
+            activeTier1 = customLoadout.emblem?.tier1?.name || customLoadout.emblem?.tier1 || 'Thrill';
+            activeTier2 = customLoadout.emblem?.tier2?.name || customLoadout.emblem?.tier2 || 'Master Assassin';
+            activeTier3 = customLoadout.emblem?.tier3?.name || customLoadout.emblem?.tier3 || 'Killing Spree';
+            activeSpell = customLoadout.spell?.name || customLoadout.spell?.id || 'Flicker';
+          } else {
+            const guide = engine.getHeroMatchupGuide(hero, enemyHeroes);
+            items = guide ? guide.build.map(b => b.name) : [];
+            activeEmblem = guide?.emblem?.name || 'Common';
+            activeTier1 = guide?.emblem?.tier1 || 'Thrill';
+            activeTier2 = guide?.emblem?.tier2 || 'Master Assassin';
+            activeTier3 = guide?.emblem?.tier3 || 'Killing Spree';
+            activeSpell = guide?.battleSpell?.name || 'Flicker';
+          }
+
+          while (items.length < 6) {
+            items.push('Dagger');
+          }
+          activeBuild = items.slice(0, 6);
+          selectedSlotIndex = 0;
+          selectedShopItem = engine.getItemByName(activeBuild[0]) || allItems[0];
+          selectedTalentTier = null;
+        });
+      } else if (tab && tab !== activeTab) {
+        untrack(() => {
+          activeTab = tab;
+        });
       }
-      // Ensure exactly 6 items in build
-      while (activeBuild.length < 6) {
-        activeBuild.push('Dagger');
-      }
-      activeBuild = activeBuild.slice(0, 6);
-      selectedSlotIndex = 0;
-      selectedShopItem = engine.getItemByName(activeBuild[0]) || allItems[0];
+    } else if (!isModalOpen) {
+      wasOpen = false;
     }
   });
 
