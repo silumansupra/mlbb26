@@ -31,7 +31,7 @@
         "unique_passive": [
           {
             "unique_passive_name": "Unique Attribute",
-            "description": "+40% Crit Damage",
+            "description": "+40% Crit Damage.",
             "modifiers": []
           },
           {
@@ -118,7 +118,7 @@
         "unique_passive": [
           {
             "unique_passive_name": "Unique Attribute",
-            "description": "+15 Physical Penetration",
+            "description": "+15 Physical Penetration.",
             "modifiers": []
           },
           {
@@ -165,7 +165,7 @@
         "unique_passive": [
           {
             "unique_passive_name": "Corrosive",
-            "description": "Basic Attacks gain 80 extra Physical Damage and slow the target by 8% (halved for ranged Basic Attacks) for 1.5 seconds. Stacks up to 5 times.",
+            "description": "Basic Attacks gain 80 extra Physical Damage and slow the target by 8% (halved for ranged Basic Attacks) for 1.5 seconds.\nStacks up to 5 times.",
             "modifiers": []
           },
           {
@@ -301,7 +301,7 @@
         "unique_passive": [
           {
             "unique_passive_name": "Divine Justice",
-            "description": "After casting a skill, the next Basic Attack within 3 seconds deals (60% Total Physical Attack) extra True Damage and recovers 80 (+40% of Total Physical Attack) HP (1.5 seconds cooldown).",
+            "description": "After casting a skill, the next Basic Attack within 3 seconds deals (60% Total Physical Attack) extra True Damage and recovers 80 (+40% of Total Physical Attack) HP.\n⏱️ Cooldown: 1.5s",
             "modifiers": []
           }
         ],
@@ -428,7 +428,7 @@
         "unique_passive": [
           {
             "unique_passive_name": "Supreme Warrior",
-            "description": "After casting an Ultimate, increase Movement Speed by 30% for 7.5 seconds. This effect has a 15 seconds cooldown.",
+            "description": "After casting an Ultimate, increase Movement Speed by 30% for 7.5 seconds.\n⏱️ Cooldown: 15s",
             "modifiers": []
           }
         ],
@@ -469,7 +469,7 @@
         "unique_passive": [
           {
             "unique_passive_name": "Unique Attribute",
-            "description": "+20% Lifesteal",
+            "description": "+20% Lifesteal.",
             "modifiers": []
           },
           {
@@ -515,12 +515,12 @@
         "unique_passive": [
           {
             "unique_passive_name": "Unique Attribute",
-            "description": "+15 Physical Penetration",
+            "description": "+15 Physical Penetration.",
             "modifiers": []
           },
           {
             "unique_passive_name": "Retribution",
-            "description": "Dealing damage to the same enemy hero or creep 5 times in a row grants 50% extra Movement Speed that decays over 3 seconds (8 seconds cooldown).",
+            "description": "Dealing damage to the same enemy hero or creep 5 times in a row grants 50% extra Movement Speed that decays over 3 seconds.\n⏱️ Cooldown: 8s",
             "modifiers": []
           }
         ],
@@ -720,7 +720,7 @@
         "unique_passive": [
           {
             "unique_passive_name": "Lifeline",
-            "description": "When taking damage that reduces HP below 30%, gains a (+60*Hero Level) shield (increases with level) and 50% Movement Speed that rapidly decays over 3 seconds. This effect has a 60 seconds cooldown.",
+            "description": "Saat menerima damage yang mengurangi HP di bawah 30%:\n• Memperoleh (+60*Hero Level) Shield (berskala dengan level)\n• Memperoleh 50% Movement Speed yang berkurang cepat dalam 3 detik\n⏱️ Cooldown: 60 detik",
             "modifiers": []
           }
         ],
@@ -766,7 +766,7 @@
           },
           {
             "unique_passive_name": "Malefic Energy",
-            "description": "Increases Basic Attack range by 12%. When hitting a target, gains 10% Movement Speed for 0.5 seconds.",
+            "description": "Increases Basic Attack range by 12%.\nWhen hitting a target, gains 10% Movement Speed for 0.5 seconds.",
             "modifiers": []
           }
         ],
@@ -980,7 +980,7 @@
           },
           {
             "unique_passive_name": "Lifeline",
-            "description": "When taking damage that reduces HP below 30%, gains a (120*Hero Level) shield (increases with level) and 50% Movement Speed that rapidly decays over 3 seconds. This effect has a 60 seconds cooldown.",
+            "description": "Saat menerima damage yang mengurangi HP di bawah 30%:\n• Memperoleh (120*Hero Level) Shield (berskala dengan level)\n• Memperoleh 50% Movement Speed yang berkurang cepat dalam 3 detik\n⏱️ Cooldown: 60 detik",
             "modifiers": []
           }
         ],
@@ -1155,7 +1155,7 @@
         "unique_passive": [
           {
             "unique_passive_name": "Fighting Spirit",
-            "description": "Attacks grants 12 extra Physical Attack per second for 4 seconds, up to 6 stacks. Deals 10% extra True Damage based on the damage dealt (no damage reduction counted) at full stacks. (Marksmen, Mages, and Supports only receive 50% of these stacked effects.)",
+            "description": "Attacks grants 12 extra Physical Attack per second for 4 seconds, up to 6 stacks.\nDeals 10% extra True Damage based on the damage dealt (no damage reduction counted) at full stacks. (Marksmen, Mages, and Supports only receive 50% of these stacked effects.).",
             "modifiers": []
           }
         ],
@@ -1197,7 +1197,7 @@
         "unique_passive": [
           {
             "unique_passive_name": "Unique Active - Wind Chant",
-            "description": "Become immune to all Physical Damage for 2 seconds (duration is halved for non-Marksmen; 90 seconds cooldown).",
+            "description": "Aktif - Wind Chant:\n• Kebal terhadap seluruh Physical Damage selama 2 detik\n• Durasi berkurang menjadi 1 detik untuk hero non-Marksman\n⏱️ Cooldown: 90 detik",
             "modifiers": []
           }
         ],
@@ -1238,7 +1238,7 @@
         "unique_passive": [
           {
             "unique_passive_name": "Typhoon",
-            "description": "Every 5\u20132 seconds (reduced by 0.2 seconds for each Basic Attack), the next Basic Attack will hit up to 3 enemy units for 150\u2013362 Magic Damage. (This attack can Crit and the damage increases to 200% against Minions.)",
+            "description": "Every 5–2 seconds (reduced by 0.2 seconds for each Basic Attack), the next Basic Attack will hit up to 3 enemy units for 150–362 Magic Damage. (This attack can Crit and the damage increases to 200% against Minions.).",
             "modifiers": []
           }
         ],
@@ -1319,7 +1319,7 @@
         "unique_passive": [
           {
             "unique_passive_name": "Lethality",
-            "description": "After dealing damage to an enemy hero, executes the hero if their HP is lower than 4%. Gains 10 stack(s) of Lethality for each kill and loses 30% current stack(s) for each death. Each stack of Lethality increases the HP threshold of the execute effect by 0.1%, stacking up 80 times.",
+            "description": "After dealing damage to an enemy hero, executes the hero if their HP is lower than 4%.\nGains 10 stack(s) of Lethality for each kill and loses 30% current stack(s) for each death.\nEach stack of Lethality increases the HP threshold of the execute effect by 0.1%, stacking up 80 times.",
             "modifiers": []
           }
         ],
@@ -1361,7 +1361,7 @@
         "unique_passive": [
           {
             "unique_passive_name": "Unique Active - Frozen",
-            "description": "Becomes frozen, untarge, and immune to damage for 2 seconds (100 seconds cooldown). Cannot move or cast skills while frozen, but skills already cast won't be interrupted.",
+            "description": "Aktif - Frozen:\n• Menjadi beku, untargetable, dan kebal dari segala jenis damage selama 2 detik\n• Tidak dapat bergerak/mengecor skill, namun skill yang sedang berjalan tidak terhenti\n⏱️ Cooldown: 100 detik",
             "modifiers": []
           }
         ],
@@ -1525,7 +1525,7 @@
         "unique_passive": [
           {
             "unique_passive_name": "Shield",
-            "description": "Upon taking Magic Damage from enemy hero skills or Basic Attacks, reduces Magic Damage taken by 25% for 3 second (including the damage that triggers the effect)s. Regains this effect 5 seconds after leaving combat.",
+            "description": "Saat menerima Magic Damage dari skill atau Basic Attack musuh:\n• Mengurangi Magic Damage yang diterima sebesar 25% selama 3 detik\n• Efek aktif kembali 5 detik setelah keluar dari pertarungan",
             "modifiers": []
           }
         ],
@@ -1606,7 +1606,7 @@
         "unique_passive": [
           {
             "unique_passive_name": "Unique Attribute",
-            "description": "+20% Crit Damage Reduction",
+            "description": "+20% Crit Damage Reduction.",
             "modifiers": []
           },
           {
@@ -1653,7 +1653,7 @@
         "unique_passive": [
           {
             "unique_passive_name": "Brute Force",
-            "description": "Each second after dealing damage, gain 8 extra Adaptive Attack and 2% extra Movement Speed for 4 seconds, up to 6 stacks. Gain 25% extra Control Duration Reduction at full stacks.",
+            "description": "Each second after dealing damage, gain 8 extra Adaptive Attack and 2% extra Movement Speed for 4 seconds, up to 6 stacks.\nGain 25% extra Control Duration Reduction at full stacks.",
             "modifiers": []
           }
         ],
@@ -1699,7 +1699,7 @@
           },
           {
             "unique_passive_name": "Redemption",
-            "description": "When incoming damage reduces HP below 30%, recover 20% Max HP over the next 2 seconds. This effect has a 60 seconds cooldown.",
+            "description": "When incoming damage reduces HP below 30%, recover 20% Max HP over the next 2 seconds.\n⏱️ Cooldown: 60s",
             "modifiers": []
           }
         ],
@@ -1740,12 +1740,12 @@
         "unique_passive": [
           {
             "unique_passive_name": "Burning Soul",
-            "description": "Deals (1.2% Total HP) Magic Damage to nearby enemies per second. This damage is increased by 125(+15*Hero Level)% against creeps and minions.",
+            "description": "Deals (1.2% Total HP) Magic Damage to nearby enemies per second.\nThis damage is increased by 125(+15*Hero Level)% against creeps and minions.",
             "modifiers": []
           },
           {
             "unique_passive_name": "Curse",
-            "description": "Dealing damage with Burning Soul will reduce the target's Hybrid Defense by 3 for 3 seconds. Stacks up to 3 times.",
+            "description": "Dealing damage with Burning Soul will reduce the target's Hybrid Defense by 3 for 3 seconds.\nStacks up to 3 times.",
             "modifiers": []
           }
         ],
@@ -1999,7 +1999,7 @@
         "unique_passive": [
           {
             "unique_passive_name": "Immortal",
-            "description": "Resurrect 2.5 seconds upon death and gets 16% Max HP and a shield that can absorb 150(+70*Hero Level\uff09damage. Shield lasts 3 seconds. This effect has a 210 seconds cooldown.",
+            "description": "Bangkit kembali 2.5 detik setelah tereliminasi:\n• Mendapatkan 16% Max HP\n• Mendapatkan Shield 150 (+70*Hero Level) selama 3 detik\n⏱️ Cooldown: 210 detik",
             "modifiers": []
           }
         ],
@@ -2119,7 +2119,7 @@
         "unique_passive": [
           {
             "unique_passive_name": "Burning Soul",
-            "description": "Deals (0.6% Total HP) Magic Damage to nearby enemies per second. This damage is increased by 125(+15*Hero Level)% against creeps and minions.",
+            "description": "Deals (0.6% Total HP) Magic Damage to nearby enemies per second.\nThis damage is increased by 125(+15*Hero Level)% against creeps and minions.",
             "modifiers": []
           }
         ],
@@ -2205,7 +2205,7 @@
         "unique_passive": [
           {
             "unique_passive_name": "Demonize",
-            "description": "When HP drops below 40%, gains 30% Damage Reduction for 3 seconds and reduces skill cooldowns by 2 seconds. This effect has a 60 seconds cooldown.",
+            "description": "Saat HP turun di bawah 40%:\n• Memperoleh 30% Damage Reduction selama 3 detik\n• Mengurangi cooldown skill sebesar 2 detik\n⏱️ Cooldown: 60 detik",
             "modifiers": []
           },
           {
@@ -2375,7 +2375,7 @@
         "unique_passive": [
           {
             "unique_passive_name": "Thunderbolt",
-            "description": "Every 4 seconds, the next Basic Attack deals 50 (+100% Extra Physical Defense) (+100% Extra Magic Defense) extra True Damage to the target and enemies around them, and briefly slows them by 99%. Hybrid Defense permanently increases by 1 each time the attack hits an enemy hero. (This effect is reduced to 50% for Marksmen and Mages)",
+            "description": "Every 4 seconds, the next Basic Attack deals 50 (+100% Extra Physical Defense) (+100% Extra Magic Defense) extra True Damage to the target and enemies around them, and briefly slows them by 99%.\nHybrid Defense permanently increases by 1 each time the attack hits an enemy hero. (This effect is reduced to 50% for Marksmen and Mages).",
             "modifiers": []
           }
         ],
@@ -2456,7 +2456,7 @@
         "unique_passive": [
           {
             "unique_passive_name": "Judgement",
-            "description": "After casting a skill, the next Basic Attack within 3 seconds deals 50 extra True Damage (1.5 seconds cooldown).",
+            "description": "After casting a skill, the next Basic Attack within 3 seconds deals 50 extra True Damage.\n⏱️ Cooldown: 1.5s",
             "modifiers": []
           }
         ],
@@ -2496,7 +2496,7 @@
         "unique_passive": [
           {
             "unique_passive_name": "Guard",
-            "description": "Gains a 800 (+100% Magic Power) Shield that will regenerate 20 seconds after being damaged. The Shield also grants 30 Movement Speed while it lasts and 150 Movement Speed for 1 second after it breaks.",
+            "description": "Gains a 800 (+100% Magic Power) Shield that will regenerate 20 seconds after being damaged.\nThe Shield also grants 30 Movement Speed while it lasts and 150 Movement Speed for 1 second after it breaks.",
             "modifiers": []
           }
         ],
@@ -2584,7 +2584,7 @@
           },
           {
             "unique_passive_name": "Gift",
-            "description": "When HP drops below 50%, recovers 15% of HP over the next 3 seconds. When Mana drops below 50%, restores 15% of Mana over the next 3 seconds. Cooldown: 60 seconds.",
+            "description": "When HP drops below 50%, recovers 15% of HP over the next 3 seconds.\nWhen Mana drops below 50%, restores 15% of Mana over the next 3 seconds.\n⏱️ Cooldown: 60s",
             "modifiers": []
           }
         ],
@@ -2625,12 +2625,12 @@
         "unique_passive": [
           {
             "unique_passive_name": "Unique Attribute",
-            "description": "+20% Hybrid Lifesteal",
+            "description": "+20% Hybrid Lifesteal.",
             "modifiers": []
           },
           {
             "unique_passive_name": "Recharge",
-            "description": "Increases Magic Power by 5 after dealing Magic Damage (this effect stacks up to 6 times and can only gain 1 stack every 0.4 second). When reaching full stacks, increases Magic Damage by 12% for 5 seconds.",
+            "description": "Increases Magic Power by 5 after dealing Magic Damage (this effect stacks up to 6 times and can only gain 1 stack every 0.4 second).\nWhen reaching full stacks, increases Magic Damage by 12% for 5 seconds.",
             "modifiers": []
           }
         ],
@@ -2670,7 +2670,7 @@
         "unique_passive": [
           {
             "unique_passive_name": "Unique Attribute",
-            "description": "+40% Magic Penetration",
+            "description": "+40% Magic Penetration.",
             "modifiers": []
           },
           {
@@ -2716,7 +2716,7 @@
         "unique_passive": [
           {
             "unique_passive_name": "Gift",
-            "description": "When HP drops below 50%, recovers 15% of HP over the next 3 seconds. When Mana drops below 50%, restores 15% of Mana over the next 3 seconds. Cooldown: 60 seconds.",
+            "description": "When HP drops below 50%, recovers 15% of HP over the next 3 seconds.\nWhen Mana drops below 50%, restores 15% of Mana over the next 3 seconds.\n⏱️ Cooldown: 60s",
             "modifiers": []
           }
         ],
@@ -2894,12 +2894,12 @@
         "unique_passive": [
           {
             "unique_passive_name": "Unique Attribute",
-            "description": "+12% Healing Effect",
+            "description": "+12% Healing Effect.",
             "modifiers": []
           },
           {
             "unique_passive_name": "Blessing",
-            "description": "When casting a healing or shield skill, if the target's HP is below 35%, or falls below 35% within 3 seconds, they will get a (100*Hero Level) shield that lasts 3 seconds. When this effect triggers, it also reduces the cooldown of the caster's skills by 2 seconds. (This effect can only trigger once every 60 seconds on the same target, and will not trigger on self-only healing and shield skills.)",
+            "description": "When casting a healing or shield skill, if the target's HP is below 35%, or falls below 35% within 3 seconds, they will get a (100*Hero Level) shield that lasts 3 seconds.\nWhen this effect triggers, it also reduces the cooldown of the caster's skills by 2 seconds. (This effect can only trigger once every 60 seconds on the same target, and will not trigger on self-only healing and shield skills.).",
             "modifiers": []
           }
         ],
@@ -2940,12 +2940,12 @@
         "unique_passive": [
           {
             "unique_passive_name": "Unique Attribute",
-            "description": "+10 Magic Penetration",
+            "description": "+10 Magic Penetration.",
             "modifiers": []
           },
           {
             "unique_passive_name": "Magic",
-            "description": "Dealing Magic Damage to enemy heroes will reduce their Magic Defense by 3+(0.3*Hero Level) for 2 seconds. Stacks up to 3 times.",
+            "description": "Dealing Magic Damage to enemy heroes will reduce their Magic Defense by 3+(0.3*Hero Level) for 2 seconds.\nStacks up to 3 times.",
             "modifiers": []
           }
         ],
@@ -3075,7 +3075,7 @@
         "unique_passive": [
           {
             "unique_passive_name": "Ice Bound",
-            "description": "When a skill deals damage to an enemy hero, it will also slow them by 10% for 2 seconds (stacks up to 3 times). This effect has a 1 second cooldown.",
+            "description": "When a skill deals damage to an enemy hero, it will also slow them by 10% for 2 seconds (stacks up to 3 times).\n⏱️ Cooldown: 1s",
             "modifiers": []
           }
         ],
@@ -3358,7 +3358,7 @@
         "unique_passive": [
           {
             "unique_passive_name": "Crisis",
-            "description": "After casting a skill, the next Basic Attack within 3 seconds deals 100 (+100% Total Magic Power) extra True Damage and reduces the target's Movement Speed by 40% for 1.5 seconds (5 seconds cooldown).",
+            "description": "After casting a skill, the next Basic Attack within 3 seconds deals 100 (+100% Total Magic Power) extra True Damage and reduces the target's Movement Speed by 40% for 1.5 seconds.\n⏱️ Cooldown: 5s",
             "modifiers": []
           }
         ],
@@ -3563,7 +3563,7 @@
         "unique_passive": [
           {
             "unique_passive_name": "Mysticism",
-            "description": "Getting a kill or assist on an enemy Minion will restore 4% Mana. (An assist occurs when a Minion dies within 2 seconds after taking damage from the hero.)",
+            "description": "Getting a kill or assist on an enemy Minion will restore 4% Mana. (An assist occurs when a Minion dies within 2 seconds after taking damage from the hero.).",
             "modifiers": []
           }
         ],
@@ -3798,7 +3798,7 @@
         "unique_passive": [
           {
             "unique_passive_name": "Mysticism",
-            "description": "Killing enemy heroes or assists regenerates 10% Mana. Killing minions regenerates 4% Mana.",
+            "description": "Killing enemy heroes or assists regenerates 10% Mana.\nKilling minions regenerates 4% Mana.",
             "modifiers": []
           }
         ],
@@ -3843,7 +3843,7 @@
         "active": [
           {
             "active_name": "Conceal",
-            "description": "Conceals nearby allies and increases Movement Speed by 30-75% for 5s (80s CD). Breaks upon taking or dealing damage.",
+            "description": "Conceals nearby allies and increases Movement Speed by 30-75% for 5s (80s CD).\nBreaks upon taking or dealing damage.",
             "modifiers": []
           }
         ],

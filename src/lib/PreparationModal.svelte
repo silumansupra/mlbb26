@@ -176,6 +176,29 @@
   let t1Obj = $derived(engine.getTalentByIdOrName(activeTier1));
   let t2Obj = $derived(engine.getTalentByIdOrName(activeTier2));
   let t3Obj = $derived(engine.getTalentByIdOrName(activeTier3));
+
+  // Clean formatter with line breaks for item descriptions
+  function formatItemDesc(text) {
+    if (!text || text === 'null') return '';
+    let t = text.trim();
+    if (t.includes('\n')) return t;
+
+    // Detect conditions like 'When ..., ' or 'If ..., ' or 'Upon ..., '
+    t = t.replace(/^((?:When|If|Upon|After)\s+[^,]+),\s*/i, '$1:\n• ');
+
+    // Break cooldown onto its own line
+    t = t.replace(/\.?\s*(This effect has an?\s+([0-9\.]+)\s*seconds?\s+cooldown\.?)/i, '\n⏱️ Cooldown: $2 detik');
+    t = t.replace(/\(([0-9\.]+)\s*seconds?\s+cooldown\)/i, '\n⏱️ Cooldown: $1 detik');
+    t = t.replace(/Cooldown:\s*([0-9\.]+)\s*seconds?\.?/i, '\n⏱️ Cooldown: $1 detik');
+
+    // Break compound effects
+    t = t.replace(/\s+and\s+([0-9%]+(?:\s+[A-Za-z]+)+)/g, '\n• Memperoleh $1');
+
+    // Break sentences ending with period
+    t = t.replace(/\.\s+(?=[A-Z])/g, '.\n• ');
+
+    return t;
+  }
 </script>
 
 {#if isOpen && hero}
@@ -311,8 +334,8 @@
                       {#each selectedShopItem.data[0].unique_passive as p}
                         {#if p.description && p.description !== 'null'}
                           <div class="passive-row">
-                            <span class="passive-name">⚡ {p.unique_passive_name || 'Pasif Unik'}:</span>
-                            <p class="passive-desc">{p.description}</p>
+                            <span class="passive-name">⚡ {p.unique_passive_name || 'Pasif Unik'}</span>
+                            <p class="passive-desc">{formatItemDesc(p.description)}</p>
                           </div>
                         {/if}
                       {/each}
@@ -321,8 +344,8 @@
                       {#each selectedShopItem.data[0].active as a}
                         {#if a.description && a.description !== 'null'}
                           <div class="passive-row active-row">
-                            <span class="passive-name">✨ {a.active_name || 'Aktif'}:</span>
-                            <p class="passive-desc">{a.description}</p>
+                            <span class="passive-name">✨ {a.active_name || 'Aktif'}</span>
+                            <p class="passive-desc">{formatItemDesc(a.description)}</p>
                           </div>
                         {/if}
                       {/each}
@@ -1064,26 +1087,44 @@
   }
 
   .inspect-passives {
-    max-height: 120px;
+    max-height: 220px;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: 0.4rem;
+    gap: 0.5rem;
+    padding-right: 0.3rem;
   }
 
   .passive-row {
-    font-size: 0.7rem;
-    line-height: 1.35;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 4px;
+    padding: 0.5rem 0.65rem;
+  }
+
+  .passive-row.active-row {
+    border-color: rgba(56, 189, 248, 0.25);
+    background: rgba(56, 189, 248, 0.04);
   }
 
   .passive-name {
     color: #f59e0b;
-    font-weight: 700;
+    font-weight: 800;
+    font-size: 0.74rem;
+    display: block;
+    margin-bottom: 0.2rem;
+  }
+
+  .active-row .passive-name {
+    color: #38bdf8;
   }
 
   .passive-desc {
-    margin: 0.1rem 0 0;
-    color: #cbd5e1;
+    margin: 0;
+    color: #e2e8f0;
+    white-space: pre-line;
+    line-height: 1.45;
+    font-size: 0.72rem;
   }
 
   .equip-trigger-btn {
