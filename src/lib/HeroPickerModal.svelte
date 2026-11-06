@@ -1,13 +1,17 @@
 <script>
-  import { getAllHeroes, normalizeLane } from './counterEngine.js';
+  import { getAllHeroes, normalizeLane, getHeroWinrate, getWinrateMetadata } from './counterEngine.js';
 
   let { isOpen = false, onClose, onSelect, title = 'CHOOSE HERO', excludedHeroes = [] } = $props();
 
   let searchQuery = $state('');
   let selectedRole = $state('ALL');
+  let sortBy = $state('default'); // 'default' | 'winrate' | 'banrate' | 'tier'
 
+  const winrateMeta = getWinrateMetadata();
   const heroes = getAllHeroes();
   const roles = ['ALL', 'MARKSMAN', 'ASSASSIN', 'MAGE', 'FIGHTER', 'TANK', 'SUPPORT'];
+
+  const tierOrder = { 'S+': 4, 'S': 3, 'A': 2, 'B': 1 };
 
   let filteredHeroes = $derived(
     heroes.filter(hero => {
@@ -30,6 +34,26 @@
       }
 
       return true;
+    }).sort((a, b) => {
+      if (sortBy === 'winrate') {
+        const wrA = getHeroWinrate(a.hero_name)?.winrate_num || 0;
+        const wrB = getHeroWinrate(b.hero_name)?.winrate_num || 0;
+        return wrB - wrA;
+      }
+      if (sortBy === 'banrate') {
+        const banA = getHeroWinrate(a.hero_name)?.banrate_num || 0;
+        const banB = getHeroWinrate(b.hero_name)?.banrate_num || 0;
+        return banB - banA;
+      }
+      if (sortBy === 'tier') {
+        const tA = tierOrder[getHeroWinrate(a.hero_name)?.tier] || 0;
+        const tB = tierOrder[getHeroWinrate(b.hero_name)?.tier] || 0;
+        if (tB !== tA) return tB - tA;
+        const wrA = getHeroWinrate(a.hero_name)?.winrate_num || 0;
+        const wrB = getHeroWinrate(b.hero_name)?.winrate_num || 0;
+        return wrB - wrA;
+      }
+      return 0; // default order
     })
   );
 
@@ -65,7 +89,10 @@
     >
       <div class="modal-top">
         <div class="top-title-col">
-          <span class="modal-sub-tag">MLBB ARSENAL // 133 HEROES</span>
+          <div class="modal-sub-line">
+            <span class="modal-sub-tag">MLBB ARSENAL // 133 HEROES</span>
+            <span class="modal-meta-sync">Update Terakhir: {winrateMeta.last_updated}</span>
+          </div>
           <h3 class="modal-heading">{title}</h3>
         </div>
         <button type="button" class="dismiss-btn" onclick={onClose} aria-label="Tutup">✕</button>
@@ -96,10 +123,47 @@
             </button>
           {/each}
         </div>
+
+        <div class="sort-matrix">
+          <span class="sort-label">URUTKAN:</span>
+          <button
+            type="button"
+            class="sort-trigger"
+            class:is-active={sortBy === 'default'}
+            onclick={() => sortBy = 'default'}
+          >
+            DEFAULT
+          </button>
+          <button
+            type="button"
+            class="sort-trigger"
+            class:is-active={sortBy === 'winrate'}
+            onclick={() => sortBy = 'winrate'}
+          >
+            WINRATE %
+          </button>
+          <button
+            type="button"
+            class="sort-trigger"
+            class:is-active={sortBy === 'banrate'}
+            onclick={() => sortBy = 'banrate'}
+          >
+            BANRATE %
+          </button>
+          <button
+            type="button"
+            class="sort-trigger"
+            class:is-active={sortBy === 'tier'}
+            onclick={() => sortBy = 'tier'}
+          >
+            META TIER
+          </button>
+        </div>
       </div>
 
       <div class="arsenal-grid">
         {#each filteredHeroes as hero (hero.hero_name)}
+          {@const wr = getHeroWinrate(hero.hero_name)}
           <button type="button" class="arsenal-card tech-bracket" onclick={() => handleSelect(hero)}>
             <div class="card-art-box">
               <img
@@ -109,10 +173,18 @@
                 onerror={(e) => { e.target.style.display = 'none'; }}
               />
               <span class="card-lane-badge">{normalizeLane(hero)}</span>
+              {#if wr}
+                <span class="card-wr-corner tier-{wr.tier?.toLowerCase()}">{wr.winrate}</span>
+              {/if}
             </div>
             <div class="card-caption">
               <span class="card-callsign">{hero.hero_name}</span>
-              <span class="card-spec">{hero.class}</span>
+              <div class="card-caption-sub">
+                <span class="card-spec">{hero.class}</span>
+                {#if wr}
+                  <span class="card-tier-pill tier-{wr.tier?.toLowerCase()}">{wr.tier}</span>
+                {/if}
+              </div>
             </div>
           </button>
         {/each}
@@ -167,6 +239,20 @@
     display: flex;
     flex-direction: column;
     gap: 2px;
+  }
+
+  .modal-sub-line {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .modal-meta-sync {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    color: var(--ally-cyan);
+    font-weight: 600;
   }
 
   .modal-sub-tag {
@@ -257,6 +343,48 @@
     gap: 0.4rem;
   }
 
+  .sort-matrix {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    padding-top: 0.4rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .sort-label {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    font-weight: 700;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    margin-right: 0.25rem;
+  }
+
+  .sort-trigger {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    font-weight: 700;
+    padding: 0.25rem 0.55rem;
+    border-radius: var(--radius-xs);
+    background: rgba(0, 0, 0, 0.35);
+    color: var(--text-dim);
+    border: 1px solid var(--border-tech);
+    transition: all 0.15s ease;
+  }
+
+  .sort-trigger:hover {
+    color: var(--text-pure);
+    border-color: var(--border-tech-bright);
+  }
+
+  .sort-trigger.is-active {
+    background: var(--gold-mythic);
+    color: #05070d;
+    border-color: var(--gold-mythic);
+    box-shadow: 0 0 8px var(--gold-glow);
+  }
+
   .role-trigger {
     font-family: var(--font-display);
     font-size: 0.72rem;
@@ -340,11 +468,81 @@
     letter-spacing: 0.5px;
   }
 
+  .card-wr-corner {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    font-family: var(--font-mono);
+    font-size: 0.55rem;
+    font-weight: 700;
+    padding: 1px 3px;
+    border-radius: 2px;
+    background: rgba(0, 0, 0, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+  }
+
+  .card-wr-corner.tier-s\+ {
+    color: #facc15;
+    border-color: rgba(250, 204, 21, 0.6);
+  }
+
+  .card-wr-corner.tier-s {
+    color: #4ade80;
+    border-color: rgba(74, 222, 128, 0.5);
+  }
+
+  .card-wr-corner.tier-a {
+    color: #38bdf8;
+  }
+
+  .card-wr-corner.tier-b {
+    color: #94a3b8;
+  }
+
   .card-caption {
     display: flex;
     flex-direction: column;
     gap: 2px;
     width: 100%;
+  }
+
+  .card-caption-sub {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 2px;
+  }
+
+  .card-tier-pill {
+    font-family: var(--font-mono);
+    font-size: 0.55rem;
+    font-weight: 700;
+    padding: 0 3px;
+    border-radius: 2px;
+    line-height: 1.2;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .card-tier-pill.tier-s\+ {
+    color: #facc15;
+    background: rgba(234, 179, 8, 0.2);
+    border-color: rgba(250, 204, 21, 0.4);
+  }
+
+  .card-tier-pill.tier-s {
+    color: #4ade80;
+    background: rgba(34, 197, 94, 0.2);
+    border-color: rgba(74, 222, 128, 0.4);
+  }
+
+  .card-tier-pill.tier-a {
+    color: #38bdf8;
+  }
+
+  .card-tier-pill.tier-b {
+    color: #94a3b8;
   }
 
   .card-callsign {

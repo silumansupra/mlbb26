@@ -46,7 +46,14 @@
               <span class="hero-name">{rec.hero.hero_name}</span>
               <span class="lane-tag">{rec.lane.toUpperCase()}</span>
             </div>
-            <span class="hero-role-text">{rec.hero.class.toUpperCase()}</span>
+            <div class="role-meta-line">
+              <span class="hero-role-text">{rec.hero.class.toUpperCase()}</span>
+              {#if rec.winrate}
+                <span class="rec-meta-badge tier-{rec.tier?.toLowerCase()}" title="Winrate: {rec.winrate} | Banrate: {rec.banrate}">
+                  WR {rec.winrate} ({rec.tier})
+                </span>
+              {/if}
+            </div>
           </div>
 
           <div class="rating-box" title="Index keunggulan matchup">
@@ -241,6 +248,44 @@
     font-size: 0.65rem;
     color: var(--text-dim);
     letter-spacing: 0.5px;
+  }
+
+  .role-meta-line {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 2px;
+  }
+
+  .rec-meta-badge {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    font-weight: 700;
+    padding: 1px 5px;
+    border-radius: 2px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .rec-meta-badge.tier-s\+ {
+    color: #facc15;
+    border-color: rgba(250, 204, 21, 0.5);
+    background: rgba(234, 179, 8, 0.15);
+  }
+
+  .rec-meta-badge.tier-s {
+    color: #4ade80;
+    border-color: rgba(74, 222, 128, 0.4);
+    background: rgba(34, 197, 94, 0.15);
+  }
+
+  .rec-meta-badge.tier-a {
+    color: #38bdf8;
+    border-color: rgba(56, 189, 248, 0.3);
+  }
+
+  .rec-meta-badge.tier-b {
+    color: #94a3b8;
   }
 
   .rating-box {
