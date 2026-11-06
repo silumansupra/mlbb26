@@ -1,5 +1,13 @@
 <script>
-  let { guide = null } = $props();
+  let { guide = null, allHeroes = [], onSelectHero } = $props();
+
+  function handleHeroChange(e) {
+    const name = e.target.value;
+    const hero = allHeroes.find(h => h.hero_name === name);
+    if (hero && onSelectHero) {
+      onSelectHero(hero);
+    }
+  }
 </script>
 
 {#if guide}
@@ -13,11 +21,30 @@
         <div class="dossier-meta">
           <div class="dossier-title-line">
             <h2 class="dossier-name">{guide.hero.hero_name.toUpperCase()}</h2>
-            <span class="active-tag">ACTIVE HERO LOADOUT</span>
+            <span class="active-tag">HERO LOADOUT</span>
           </div>
-          <span class="dossier-class">{guide.hero.class} // {guide.hero.speciality?.join(' • ') || 'TACTICAL ASSET'}</span>
+          <span class="dossier-class">{guide.hero.class} // {guide.playstyle || 'TACTICAL ASSET'}</span>
         </div>
       </div>
+
+      <!-- QUICK HERO SELECTOR (ALL 133 HEROES) -->
+      {#if allHeroes && allHeroes.length > 0}
+        <div class="quick-switcher">
+          <label for="hero-select-input" class="switcher-label">INSPECT ANY HERO:</label>
+          <div class="select-wrapper">
+            <select
+              id="hero-select-input"
+              class="hero-select-box"
+              value={guide?.hero?.hero_name || ''}
+              onchange={handleHeroChange}
+            >
+              {#each allHeroes as h}
+                <option value={h.hero_name}>{h.hero_name} ({h.class})</option>
+              {/each}
+            </select>
+          </div>
+        </div>
+      {/if}
     </div>
 
     <!-- SPELL & EMBLEM SPLIT CONSOLE -->
@@ -26,15 +53,29 @@
       <div class="sub-cell spell-cell">
         <div class="cell-head">
           <span class="cell-tag">TACTICAL SPELL</span>
-          <h4 class="cell-title">COMBAT SPELL DIRECTIVE</h4>
+          <h4 class="cell-title">BATTLE SPELL DIRECTIVE</h4>
         </div>
 
         <div class="spell-payload">
+          <!-- Active Spell -->
           <div class="spell-banner">
-            <span class="spell-callsign">{guide.battleSpell.name.toUpperCase()}</span>
-            <span class="spell-status-tag">RECOMMENDED</span>
+            <div class="spell-title-col">
+              <span class="spell-callsign">{guide.battleSpell.name.toUpperCase()}</span>
+              <span class="spell-status-tag">MATCHUP CHOICE</span>
+            </div>
           </div>
           <p class="spell-logic">{guide.battleSpell.reason}</p>
+
+          <!-- Situational / Alternate Spell -->
+          {#if guide.allSpells && guide.allSpells.situational && guide.allSpells.situational.name !== guide.battleSpell.name}
+            <div class="alt-spell-box">
+              <div class="alt-spell-head">
+                <span class="alt-tag">OPSI ALTERNATIF / SITUASIONAL:</span>
+                <span class="alt-name">{guide.allSpells.situational.name} ({guide.allSpells.situational.cd || '90s'})</span>
+              </div>
+              <p class="alt-desc">{guide.allSpells.situational.reason}</p>
+            </div>
+          {/if}
         </div>
       </div>
 
@@ -106,7 +147,7 @@
       <div class="sub-cell directives-cell">
         <div class="cell-head">
           <span class="cell-tag alert-tag">TACTICAL INTEL</span>
-          <h4 class="cell-title">MATCHUP EXECUTION DIRECTIVES</h4>
+          <h4 class="cell-title">HERO & MATCHUP EXECUTION DIRECTIVES</h4>
         </div>
 
         <div class="directives-stack">
@@ -138,6 +179,11 @@
   .console-dossier-bar {
     border-bottom: 1px solid var(--border-tech);
     padding-bottom: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
   }
 
   .dossier-profile {
@@ -202,6 +248,49 @@
     letter-spacing: 0.5px;
   }
 
+  .quick-switcher {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.25rem;
+  }
+
+  .switcher-label {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    font-weight: 700;
+    color: var(--gold-mythic);
+    letter-spacing: 1px;
+  }
+
+  .select-wrapper {
+    position: relative;
+  }
+
+  .hero-select-box {
+    background: rgba(5, 7, 13, 0.8);
+    border: 1px solid var(--border-tech-bright);
+    color: var(--text-pure);
+    font-family: var(--font-display);
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.35rem 0.75rem;
+    border-radius: var(--radius-xs);
+    cursor: pointer;
+    outline: none;
+    transition: all 0.15s ease;
+  }
+
+  .hero-select-box:hover, .hero-select-box:focus {
+    border-color: var(--ally-cyan);
+    box-shadow: 0 0 12px var(--ally-glow);
+  }
+
+  .hero-select-box option {
+    background: #0b101c;
+    color: #e2e8f0;
+  }
+
   .console-subgrid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -211,6 +300,10 @@
   @media (max-width: 820px) {
     .console-subgrid {
       grid-template-columns: 1fr;
+    }
+    .quick-switcher {
+      align-items: flex-start;
+      width: 100%;
     }
   }
 
@@ -259,13 +352,19 @@
   .spell-payload {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.65rem;
   }
 
   .spell-banner {
     display: flex;
     align-items: center;
     gap: 0.6rem;
+  }
+
+  .spell-title-col {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
   }
 
   .spell-callsign {
@@ -292,6 +391,43 @@
     font-size: 0.8rem;
     color: #cbd5e1;
     line-height: 1.4;
+  }
+
+  .alt-spell-box {
+    background: rgba(5, 7, 13, 0.5);
+    border: 1px solid var(--border-tech);
+    padding: 0.5rem 0.65rem;
+    border-radius: var(--radius-xs);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .alt-spell-head {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+  }
+
+  .alt-tag {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: var(--text-dim);
+  }
+
+  .alt-name {
+    font-family: var(--font-display);
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--ally-cyan);
+  }
+
+  .alt-desc {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    line-height: 1.35;
   }
 
   .emblem-payload {

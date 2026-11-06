@@ -43,6 +43,7 @@
 
   // Selected slot for active view in HeroDetailPanel
   let activeHeroIndex = $state(0);
+  let inspectedHero = $state(null);
 
   // Modal State
   let isModalOpen = $state(false);
@@ -52,9 +53,9 @@
   let selectedEnemyHeroes = $derived(enemyTeam.filter(Boolean));
   let selectedMyHeroes = $derived(myTeam.filter(Boolean));
 
-  // Derived: Active Ally Hero for Matchup Guide
+  // Derived: Active Ally Hero for Matchup Guide (defaults to Clint if none selected)
   let activeAllyHero = $derived(
-    myTeam[activeHeroIndex] || selectedMyHeroes[0] || null
+    inspectedHero || myTeam[activeHeroIndex] || selectedMyHeroes[0] || engine.getHeroByName('Clint')
   );
 
   // Derived: Threat analysis from enemy team
@@ -80,10 +81,16 @@
 
   // Handler: Click slot to open modal
   function handleSlotClick(team, index) {
-    activeSlotToPick = { team, index };
-    isModalOpen = true;
-    if (team === 'my') {
+    if (team === 'my' && myTeam[index]) {
+      inspectedHero = null;
       activeHeroIndex = index;
+    } else {
+      inspectedHero = null;
+      activeSlotToPick = { team, index };
+      isModalOpen = true;
+      if (team === 'my') {
+        activeHeroIndex = index;
+      }
     }
   }
 
@@ -97,6 +104,7 @@
       next[index] = hero;
       myTeam = next;
       activeHeroIndex = index;
+      inspectedHero = hero;
     } else {
       const next = [...enemyTeam];
       next[index] = hero;
@@ -139,6 +147,7 @@
     myTeam = [null, null, null, null, null];
     enemyTeam = [null, null, null, null, null];
     activeHeroIndex = 0;
+    inspectedHero = null;
   }
 
   // Quick Action: Pick recommended counter into My Team
@@ -220,7 +229,11 @@
       <!-- Right Column: Hero Matchup Console -->
       <div class="viewport-col">
         {#if matchupGuide}
-          <HeroDetailPanel guide={matchupGuide} />
+          <HeroDetailPanel
+            guide={matchupGuide}
+            allHeroes={engine.getAllHeroes()}
+            onSelectHero={(h) => inspectedHero = h}
+          />
         {:else}
           <div class="empty-dossier tech-bracket">
             <span class="empty-dossier-code">AWAITING_ACTIVE_HERO_SELECTION</span>

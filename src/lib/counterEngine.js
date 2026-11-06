@@ -3,6 +3,7 @@ import itemsData from '../data/items.json';
 import emblemsData from '../data/emblems.json';
 import talentsData from '../data/talents.json';
 import spellsData from '../data/spells.json';
+import heroBuildsData from '../data/heroBuilds.json';
 
 // Archetype Tags for deeper contextual countering
 export const HERO_TRAITS = {
@@ -47,7 +48,7 @@ export const HERO_TRAITS = {
   ],
   // High Mobility / Dash Spammers
   high_mobility: [
-    'Fanny', 'Ling', 'Joy', 'Benedetta', 'Chou', 'Lancelot', 'Nolan', 'Harith', 'Wanwan', 'Cici'
+    'Fanny', 'Ling', 'Joy', 'Benedetta', 'Chou', 'Lancelot', 'Nolan', 'Harith', 'Wanwan', 'Cici', 'Sora'
   ]
 };
 
@@ -79,6 +80,11 @@ export function getHeroByName(name) {
 
 export function getAllHeroes() {
   return heroesData;
+}
+
+export function getHeroBuild(heroName) {
+  if (!heroName) return null;
+  return heroBuildsData[heroName.toLowerCase()] || null;
 }
 
 // 1. Analyze Threats from Enemy Team
@@ -250,21 +256,18 @@ export function calculateCounterRecommendations(enemyHeroes, myHeroes = []) {
     });
 
     // 5. Special Archetype Counters
-    // Diggie vs Heavy CC
     const hasHeavyCc = enemyHeroes.some(h => HERO_TRAITS.heavy_cc.includes(h.hero_name));
     if (hasHeavyCc && candidate.hero_name === 'Diggie') {
       score += 45;
       reasons.push('Ultimate Time Journey memberikan anti-CC massal terhadap kombo CC musuh.');
     }
 
-    // Baxia vs High Regen
     const hasRegen = enemyHeroes.some(h => HERO_TRAITS.high_regen.includes(h.hero_name));
     if (hasRegen && candidate.hero_name === 'Baxia') {
       score += 40;
       reasons.push('Pasif Baxia memotong efek regen/shield musuh secara natural sejak level 1.');
     }
 
-    // Karrie / Lunox vs High HP tanks
     const hasTanks = enemyHeroes.filter(h => HERO_TRAITS.high_hp_tank.includes(h.hero_name)).length >= 2;
     if (hasTanks) {
       if (candidate.hero_name === 'Karrie') {
@@ -277,7 +280,6 @@ export function calculateCounterRecommendations(enemyHeroes, myHeroes = []) {
       }
     }
 
-    // Khufra / Minsitthar / Phoveus vs Dash Spammers
     const hasMobility = enemyHeroes.filter(h => HERO_TRAITS.high_mobility.includes(h.hero_name)).length >= 2;
     if (hasMobility) {
       if (['Khufra', 'Minsitthar', 'Phoveus'].includes(candidate.hero_name)) {
@@ -286,7 +288,6 @@ export function calculateCounterRecommendations(enemyHeroes, myHeroes = []) {
       }
     }
 
-    // Belerick / Lolita vs Attack Speed & Projectile
     const hasAtkSpeed = enemyHeroes.some(h => HERO_TRAITS.attack_speed_crit.includes(h.hero_name));
     if (hasAtkSpeed && candidate.hero_name === 'Belerick') {
       score += 30;
@@ -320,243 +321,102 @@ export function getHeroMatchupGuide(hero, enemyHeroes = []) {
   if (!hero) return null;
 
   const threats = analyzeEnemyThreats(enemyHeroes);
-  const heroClass = (hero.class || '').toLowerCase();
   const heroName = hero.hero_name;
+  const baseBuild = heroBuildsData[heroName.toLowerCase()] || heroBuildsData['clint'];
 
-  // A. BATTLE SPELL RECOMMENDATION
-  let spell = { id: 'flicker', name: 'Flicker', reason: 'Universal untuk reposisi, kejar musuh, atau kabur.' };
-  
   const hasHeavyCc = threats.some(t => t.id === 'heavy_cc');
   const hasAamon = enemyHeroes.some(h => h.hero_name === 'Aamon');
   const hasTigreal = enemyHeroes.some(h => h.hero_name === 'Tigreal');
   const hasBadang = enemyHeroes.some(h => h.hero_name === 'Badang');
-
-  if (hero.laning?.join(', ').toLowerCase().includes('jungle')) {
-    spell = { id: 'retribution', name: 'Retribution', reason: 'Wajib untuk Jungler mengamankan buff, Turtle, dan Lord.' };
-  } else if (hasHeavyCc || hasBadang || hasTigreal) {
-    if (heroClass.includes('marksman') || heroClass.includes('mage') || ['Clint', 'Brody', 'Moskov', 'Layla', 'Miya'].includes(heroName)) {
-      spell = {
-        id: 'purify',
-        name: 'Purify',
-        reason: 'Sangat direkomendasikan! Melepaskan sedotan Tigreal, dinding Badang, dan rantai CC agar tidak mati sia-sia.'
-      };
-    }
-  } else if (heroClass.includes('tank') || ['Ruby', 'Terizla', 'Gatotkaca', 'Belerick'].includes(heroName)) {
-    spell = { id: 'vengeance', name: 'Vengeance', reason: 'Menyerap 35% damage dan memantulkannya kembali ke penyerang.' };
-  } else if (heroClass.includes('mage')) {
-    spell = { id: 'flameshot', name: 'Flameshot', reason: 'Menembak musuh sekarat dari jauh dan knockback saat disergap.' };
-  }
-
-  // B. EMBLEM & TALENTS SETUP
-  let baseEmblem = 'Common';
-  let tier1 = 'Swift';
-  let tier2 = 'Bargain Hunter';
-  let tier3 = 'Quantum Charge';
-  let emblemRationale = '';
-
-  if (heroClass.includes('marksman')) {
-    if (['Clint', 'Brody', 'Lesley', 'Beatrix'].includes(heroName)) {
-      baseEmblem = 'Assassin';
-      tier1 = 'Rupture (+5 Adaptive Penetration)';
-      tier2 = 'Weapons Master (+5% Extra Attack)';
-      tier3 = 'Quantum Charge (HP Heal & 40% Movement Speed saat Basic Attack)';
-      emblemRationale = 'Mengoptimalkan burst damage & penetration awal, dipadu Quantum Charge untuk kiting lincah.';
-    } else {
-      baseEmblem = 'Marksman';
-      tier1 = 'Fatal (+5% Crit Chance & +10% Crit DMG)';
-      tier2 = 'Bargain Hunter (Diskon 5% harga item)';
-      tier3 = 'Quantum Charge (Heal & Movement Speed) atau Weakness Finder';
-      emblemRationale = 'Fokus pada percepatan item dan lifesteal/attack speed untuk scaling late game.';
-    }
-  } else if (heroClass.includes('assassin')) {
-    baseEmblem = 'Assassin';
-    tier1 = 'Rupture (+5 Adaptive Penetration)';
-    tier2 = 'Master Assassin (Bonus damage 7% saat duel 1v1)';
-    tier3 = 'Killing Spree (Regen 8% HP & 20% MS setelah kill)';
-    emblemRationale = 'Burst execution cepat dan sustain darah setelah mengeliminasi musuh.';
-  } else if (heroClass.includes('mage')) {
-    baseEmblem = 'Mage';
-    tier1 = 'Inspire (+5% Cooldown Reduction)';
-    tier2 = 'Bargain Hunter (Diskon harga item)';
-    tier3 = 'Lethal Ignition (Bonus burn damage setelah 3x serangan berturut)';
-    emblemRationale = 'Maksimalisasi Magic Penetration & burst damage kombo skill.';
-  } else if (heroClass.includes('fighter')) {
-    baseEmblem = 'Fighter';
-    tier1 = 'Firmness (+6 Defense Fisik & Magic)';
-    tier2 = 'Festival of Blood (Spell Vamp meningkat hingga 10%)';
-    tier3 = 'Brave Smite (Skill memulihkan 4% Max HP)';
-    emblemRationale = 'Sustain darah tebal saat adu pukul di garis depan EXP Lane.';
-  } else if (heroClass.includes('tank')) {
-    baseEmblem = 'Tank';
-    tier1 = 'Vitality (+225 Max HP)';
-    tier2 = 'Tenacity (Bonus +15 Defense saat HP di bawah 50%)';
-    tier3 = 'Concussive Blast (Ledakan magic damage area berbasis HP)';
-    emblemRationale = 'Daya tahan maksimal untuk inisiasi perang di garis depan.';
-  } else if (heroClass.includes('support')) {
-    baseEmblem = 'Support';
-    tier1 = 'Agility (+4% Movement Speed)';
-    tier2 = 'Pull Yourself Together (Cooldown Battle Spell -15%)';
-    tier3 = 'Focusing Mark (Menambah damage tim ke target sebesar 6%)';
-    emblemRationale = 'Rotasi cepat dan memperkuat damage tim pada target yang di-lock.';
-  }
-
-  // C. ADAPTIVE ITEM BUILD (6 ITEMS)
-  const buildItems = [];
-
-  // Boots selection
-  if (hasHeavyCc) {
-    buildItems.push({
-      name: 'Tough Boots',
-      reason: 'Wajib vs CC musuh: memotong durasi stun dan debuff sebesar 30%.',
-      isCounter: true
-    });
-  } else if (heroClass.includes('marksman')) {
-    buildItems.push({ name: 'Swift Boots', reason: 'Tambahan +15% Attack Speed untuk laning.', isCounter: false });
-  } else if (heroClass.includes('mage')) {
-    buildItems.push({ name: 'Arcane Boots', reason: 'Magic Penetration untuk tembus magic defense lawan.', isCounter: false });
-  } else {
-    buildItems.push({ name: 'Warrior Boots', reason: 'Meningkatkan Physical Defense saat terkena Basic Attack.', isCounter: false });
-  }
-
-  // Hero specific core items & reactive counters
   const hasRegen = threats.some(t => t.id === 'high_regen');
   const hasMagicBurst = threats.some(t => t.id === 'magic_burst');
   const hasPhysicalBurst = threats.some(t => t.id === 'physical_burst');
-  const hasHighHp = threats.some(t => t.id === 'high_hp_tank');
 
-  if (heroClass.includes('marksman')) {
-    if (heroName === 'Clint') {
-      buildItems.push({ name: 'Endless Battle', reason: 'Core utama Clint: True Damage dari pasif setiap mengeluarkan skill.', isCounter: false });
-      buildItems.push({ name: "Blade of Despair", reason: 'Damage fisik masif untuk eksekusi musuh.', isCounter: false });
-      
-      // Reactive Counter 1: Anti-Regen or Armor Shred
-      if (hasRegen) {
-        buildItems.push({ name: 'Sea Halberd', reason: 'Counter Cici/Uranus: Anti-heal 50% + bonus damage ke hero berdarah tebal.', isCounter: true });
-      } else {
-        buildItems.push({ name: 'Malefic Roar', reason: 'Tembus armor tank & turret musuh.', isCounter: false });
-      }
-
-      // Reactive Counter 2: Defense vs Enemy Burst
-      if (hasMagicBurst) {
-        buildItems.push({ name: "Athena's Shield", reason: 'Counter Aamon/Burst Magic: Mengurangi magic burst 25% agar tidak one-shot mati.', isCounter: true });
-      } else if (hasPhysicalBurst) {
-        buildItems.push({ name: 'Wind of Nature', reason: 'Counter Badang/Physical burst: Kebal 2 detik dari physical damage.', isCounter: true });
-      } else {
-        buildItems.push({ name: 'Great Dragon Spear', reason: 'Crit Chance + Cooldown + bonus speed saat ultimate.', isCounter: false });
-      }
-
-      // Slot 6: WoN or Immortality
-      if (!buildItems.some(i => i.name === 'Wind of Nature')) {
-        buildItems.push({ name: 'Wind of Nature', reason: 'Penyelamat darurat saat duel dengan physical burst musuh.', isCounter: true });
-      } else {
-        buildItems.push({ name: 'Immortality', reason: 'Bangkit kembali setelah tereliminasi.', isCounter: false });
-      }
-
-    } else if (heroName === 'Brody') {
-      buildItems.push({ name: 'Blade of the Heptaseas', reason: 'Burst damage tusukan pertama saat keluar dari bush.', isCounter: false });
-      buildItems.push({ name: 'Malefic Roar', reason: 'Tembus physical defense musuh.', isCounter: false });
-      if (hasRegen) {
-        buildItems.push({ name: 'Sea Halberd', reason: 'Matikan lifesteal dan regen musuh.', isCounter: true });
-      } else {
-        buildItems.push({ name: 'Blade of Despair', reason: 'Damage eksekusi ekstra untuk ultimate.', isCounter: false });
-      }
-      if (hasMagicBurst) {
-        buildItems.push({ name: "Athena's Shield", reason: 'Kebal dari instakill burst mage/assassin magic.', isCounter: true });
-      }
-      buildItems.push({ name: 'Wind of Nature', reason: 'Kebal fisik 2 detik saat diserang Badang atau MM musuh.', isCounter: true });
-      buildItems.push({ name: 'Brute Force Breastplate', reason: 'Tambahan hybrid defense & pengurangan durasi CC.', isCounter: false });
-
-    } else {
-      // General Marksman (Miya, Moskov, Layla, Claude, Hanabi)
-      buildItems.push({ name: 'Corrosion Scythe', reason: 'Attack Speed + efek slow berkelanjutan.', isCounter: false });
-      if (hasHighHp) {
-        buildItems.push({ name: 'Demon Hunter Sword', reason: 'Counter hero tebal: Damage tambahan berbasis % HP lawan.', isCounter: true });
-      } else {
-        buildItems.push({ name: "Berserker's Fury", reason: 'Crit damage & crit chance.', isCounter: false });
-      }
-      buildItems.push({ name: 'Golden Staff', reason: 'Mengubah crit menjadi kecepatan serang konstan.', isCounter: false });
-      
-      if (hasPhysicalBurst || enemyHeroes.some(h => ['Badang', 'Saber'].includes(h.hero_name))) {
-        buildItems.push({ name: 'Wind of Nature', reason: 'Wajib: Kebal damage fisik 2 detik.', isCounter: true });
-      }
-      if (hasMagicBurst) {
-        buildItems.push({ name: "Rose Gold Meteor", reason: 'Perisai darurat saat HP turun di bawah 30% dari magic burst.', isCounter: true });
-      } else if (hasRegen) {
-        buildItems.push({ name: 'Sea Halberd', reason: 'Anti-heal dan penambah damage ke hero bertubuh tebal.', isCounter: true });
-      } else {
-        buildItems.push({ name: 'Malefic Roar', reason: 'Penetrasi armor penembus tank.', isCounter: false });
-      }
-    }
-  } else if (heroClass.includes('mage')) {
-    buildItems.push({ name: 'Lightning Truncheon', reason: 'Burst damage memantul berbasis Mana.', isCounter: false });
-    if (hasRegen) {
-      buildItems.push({ name: 'Glowing Wand', reason: 'Counter regen: Efek bakar + memotong efek heal/shield 50%.', isCounter: true });
-    } else {
-      buildItems.push({ name: 'Holy Crystal', reason: 'Lonjakan Magic Power besar-besaran.', isCounter: false });
-    }
-    if (hasHighHp) {
-      buildItems.push({ name: 'Wishing Lantern', reason: 'Setiap 800 damage magic menembakkan 10% target current HP.', isCounter: true });
-    } else {
-      buildItems.push({ name: 'Clock of Destiny', reason: 'Menambah Max Mana dan HP bertahap.', isCounter: false });
-    }
-    buildItems.push({ name: 'Divine Glaive', reason: 'Magic penetration memotong magic defense musuh.', isCounter: false });
-    buildItems.push({ name: 'Winter Crown', reason: 'Membeku 2 detik untuk menghindari kombo maut musuh.', isCounter: true });
-
-  } else if (heroClass.includes('tank') || heroClass.includes('fighter')) {
-    if (hasRegen) {
-      buildItems.push({ name: 'Dominance Ice', reason: 'Wajib lini depan: Mengurangi heal musuh 50% & potong attack speed.', isCounter: true });
-    }
-    if (hasMagicBurst) {
-      buildItems.push({ name: "Athena's Shield", reason: 'Meredam 25% magic burst Aamon/Eudora.', isCounter: true });
-    }
-    if (hasPhysicalBurst) {
-      buildItems.push({ name: 'Antique Cuirass', reason: 'Mereduksi Physical Attack musuh hingga 24% saat terkena skill.', isCounter: true });
-    }
-    buildItems.push({ name: 'Blade Armor', reason: 'Memantulkan 30% basic attack & meredam 20% critical damage musuh.', isCounter: true });
-    buildItems.push({ name: 'Immortality', reason: 'Memberikan nyawa kedua di teamfight penting.', isCounter: false });
-    if (buildItems.length < 6) {
-      buildItems.push({ name: 'Radiant Armor', reason: 'Meredam damage magic beruntun.', isCounter: false });
-    }
-  } else {
-    // Default fallback
-    buildItems.push({ name: 'War Axe', reason: 'True damage & Spell Vamp berkelanjutan.', isCounter: false });
-    buildItems.push({ name: 'Brute Force Breastplate', reason: 'Pertahanan hybrid & pengurangan durasi CC.', isCounter: false });
-    if (hasRegen) buildItems.push({ name: 'Sea Halberd', reason: 'Anti-heal.', isCounter: true });
-    if (hasMagicBurst) buildItems.push({ name: "Athena's Shield", reason: 'Anti-magic burst.', isCounter: true });
-    buildItems.push({ name: 'Malefic Roar', reason: 'Armor shredder.', isCounter: false });
+  // A. BATTLE SPELL SELECTION (Hero Primary vs Matchup Situational)
+  let spell = { ...baseBuild.spells.primary };
+  if ((hasHeavyCc || hasBadang || hasTigreal) && baseBuild.spells.situational?.name === 'Purify') {
+    spell = {
+      name: 'Purify',
+      reason: `Sangat direkomendasikan vs musuh saat ini: Menghindari sedotan Tigreal dan jebakan tembok Badang!`
+    };
+  } else if (hasMagicBurst && baseBuild.spells.situational?.name === 'Flicker') {
+    spell = { ...baseBuild.spells.situational };
   }
 
-  // Ensure 6 items exactly
-  while (buildItems.length < 6) {
-    buildItems.push({ name: 'Immortality', reason: 'Asuransi late game untuk bangkit kembali.', isCounter: false });
+  // B. EMBLEM & TALENTS SETUP
+  const emblem = {
+    name: baseBuild.emblem.base,
+    rationale: baseBuild.emblem.rationale,
+    tier1: `${baseBuild.emblem.tier1.name} (${baseBuild.emblem.tier1.desc})`,
+    tier2: `${baseBuild.emblem.tier2.name} (${baseBuild.emblem.tier2.desc})`,
+    tier3: `${baseBuild.emblem.tier3.name} (${baseBuild.emblem.tier3.desc})`
+  };
+
+  // C. ADAPTIVE 6-ITEM BUILD
+  // Start with the hero's 6 tailored core items
+  const items = baseBuild.items.core.map(item => ({
+    name: item.name,
+    reason: item.desc,
+    isCounter: false
+  }));
+
+  // Apply dynamic reactive substitutions based on enemy threats
+  if (baseBuild.items.counter_substitutions) {
+    baseBuild.items.counter_substitutions.forEach(sub => {
+      let shouldApply = false;
+      if (sub.trigger === 'magic_burst' && hasMagicBurst) shouldApply = true;
+      if (sub.trigger === 'high_regen' && hasRegen) shouldApply = true;
+      if (sub.trigger === 'continuous_magic' && threats.some(t => t.id === 'continuous_magic')) shouldApply = true;
+      if (sub.trigger === 'physical_burst' && hasPhysicalBurst) shouldApply = true;
+
+      if (shouldApply) {
+        // Find index of item to replace
+        let replaceIdx = items.findIndex(i => i.name === sub.replaces);
+        if (replaceIdx === -1 && items.length >= 5) {
+          replaceIdx = 4; // replace slot 5
+        }
+        if (replaceIdx !== -1 && !items.some(i => i.name === sub.name)) {
+          items[replaceIdx] = {
+            name: sub.name,
+            reason: sub.reason,
+            isCounter: true
+          };
+        }
+      }
+    });
   }
 
-  // D. STRATEGY & DANGER NOTES
-  const tips = [];
+  // If heavy CC present and slot 1 is boots, emphasize Tough Boots
+  if (hasHeavyCc && items[0] && items[0].name.includes('Boots') && items[0].name !== 'Tough Boots') {
+    items[0] = {
+      name: 'Tough Boots',
+      reason: 'Wajib vs CC musuh: Memotong durasi stun dan debuff sebesar 30%.',
+      isCounter: true
+    };
+  }
+
+  // D. TACTICAL DIRECTIVES (Combine hero base tips + match specific warnings)
+  const tips = [...(baseBuild.gameplay_tips || [])];
   if (hasAamon) {
-    tips.push('⚠️ Waspada Aamon saat HP di bawah 50%: Ulti pecahan pisaunya bersifat Execute (semakin sedikit HP-mu, semakin mematikan). Beli Athena\'s Shield sebelum menit 10.');
+    tips.push('WASPADA AAMON: Ulti pecahan pisaunya bersifat Execute saat darah di bawah 50%. Selesaikan Athena\'s Shield sesegera mungkin.');
   }
   if (hasTigreal) {
-    tips.push('⚠️ Jaga jarak dari Tigreal: Jangan berkumpul rapat di dekat teman satu tim. Simpan skill kabur atau Purify sampai Tigreal menggunakan flicker-ult.');
+    tips.push('SPACING TIGREAL: Jangan berkumpul rapat dengan rekan setim agar tidak tersedot bersamaan oleh Flicker-Ultimate Tigreal.');
   }
   if (hasBadang) {
-    tips.push('⚠️ Hindari pertarungan di lorong sempit / dekat dinding: Badang sangat butuh dinding untuk mengunci stun ultinya. Jika terjebak, segera pencet Purify/WoN.');
+    tips.push('ZONING BADANG: Hindari lorong sempit dekat tebing/dinding agar tidak terkena knockback stun beruntun.');
   }
-  if (threats.some(t => t.id === 'high_regen')) {
-    tips.push('⚠️ Selesaikan item Anti-Heal segera: Tanpa anti-heal, musuh tipe sustain akan memenangkan perang panjang (attrition fight).');
+  if (hasRegen) {
+    tips.push('ANTI-HEAL PRIORITY: Amankan item Anti-Heal sebelum memasuki teamfight perebutan Lord.');
   }
 
   return {
     hero,
+    playstyle: baseBuild.playstyle,
     battleSpell: spell,
-    emblem: {
-      name: baseEmblem,
-      rationale: emblemRationale,
-      tier1,
-      tier2,
-      tier3
-    },
-    build: buildItems.slice(0, 6),
+    allSpells: baseBuild.spells,
+    emblem,
+    build: items.slice(0, 6),
     threats,
     tips
   };
