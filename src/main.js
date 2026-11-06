@@ -3,10 +3,11 @@ import './app.css';
 import App from './App.svelte';
 import { inject } from '@vercel/analytics';
 
-inject();
-
 const app = mount(App, {
   target: document.getElementById('app'),
 });
+
+// Inject Vercel Analytics
+inject();
 
 export default app;

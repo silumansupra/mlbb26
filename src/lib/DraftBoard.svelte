@@ -111,6 +111,7 @@
           </div>
 
           {#if hero}
+            {@const wr = engine.getHeroWinrate(hero.hero_name)}
             <div class="hero-art-frame">
               <img src={hero.portrait || '/default-hero.webp'} alt={hero.hero_name} class="hero-art" />
               <button
@@ -124,7 +125,14 @@
             </div>
             <div class="hero-dossier">
               <span class="hero-callsign">{hero.hero_name}</span>
-              <span class="hero-type">{hero.class}</span>
+              <div class="hero-subline">
+                <span class="hero-type">{hero.class}</span>
+                {#if wr}
+                  <span class="card-wr-tag tier-{wr.tier?.toLowerCase()}" title="Winrate: {wr.winrate} | Banrate: {wr.banrate}">
+                    WR {wr.winrate}
+                  </span>
+                {/if}
+              </div>
             </div>
           {:else}
             <div class="placeholder-node">
@@ -216,6 +224,7 @@
           </div>
 
           {#if hero}
+            {@const wr = engine.getHeroWinrate(hero.hero_name)}
             <div class="hero-art-frame">
               <img src={hero.portrait || '/default-hero.webp'} alt={hero.hero_name} class="hero-art" />
               <button
@@ -229,7 +238,14 @@
             </div>
             <div class="hero-dossier">
               <span class="hero-callsign">{hero.hero_name}</span>
-              <span class="hero-type">{hero.class}</span>
+              <div class="hero-subline">
+                <span class="hero-type">{hero.class}</span>
+                {#if wr}
+                  <span class="card-wr-tag tier-{wr.tier?.toLowerCase()}" title="Winrate: {wr.winrate} | Banrate: {wr.banrate}">
+                    WR {wr.winrate}
+                  </span>
+                {/if}
+              </div>
             </div>
           {:else}
             <div class="placeholder-node enemy-node">
@@ -543,6 +559,44 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+
+  .hero-subline {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .card-wr-tag {
+    font-family: var(--font-mono);
+    font-size: 0.58rem;
+    font-weight: 700;
+    padding: 1px 4px;
+    border-radius: 2px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .card-wr-tag.tier-s\+ {
+    color: #facc15;
+    border-color: rgba(250, 204, 21, 0.5);
+    background: rgba(234, 179, 8, 0.15);
+  }
+
+  .card-wr-tag.tier-s {
+    color: #4ade80;
+    border-color: rgba(74, 222, 128, 0.4);
+    background: rgba(34, 197, 94, 0.15);
+  }
+
+  .card-wr-tag.tier-a {
+    color: #38bdf8;
+    border-color: rgba(56, 189, 248, 0.3);
+  }
+
+  .card-wr-tag.tier-b {
+    color: #94a3b8;
   }
 
   .placeholder-node {

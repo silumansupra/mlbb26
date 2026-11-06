@@ -1,0 +1,38 @@
+name: Daily MLBB Winrate Sync
+
+on:
+  schedule:
+    # Runs every day at 17:00 UTC (00:00 WIB)
+    - cron: '0 17 * * *'
+  workflow_dispatch: # Allows manual trigger from GitHub Actions tab
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Fetch and Sync Latest MLBB Winrates
+        run: npm run sync:winrate
+
+      - name: Commit and Push Updated Winrate Database
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if [[ -n $(git status -s src/data/winrate.json) ]]; then
+            git add src/data/winrate.json
+            git commit -m "chore(data): auto-sync MLBB hero winrates $(date +'%Y-%m-%d')"
+            git push origin HEAD:main
+            echo "Successfully updated and pushed winrate.json"
+          else
+            echo "No changes in winrate data today."
+          fi

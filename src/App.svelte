@@ -9,6 +9,9 @@
 
   import * as engine from './lib/counterEngine.js';
 
+  // Winrate metadata
+  const winrateMeta = engine.getWinrateMetadata();
+
   // State: Active Background with LocalStorage persistence
   const savedBg = typeof localStorage !== 'undefined' ? localStorage.getItem('mlbb_draft_bg') : null;
   let activeBg = $state(savedBg || 'abyss');
@@ -218,6 +221,11 @@
           {isVivid}
           onToggleVivid={handleToggleVivid}
         />
+        <div class="hud-stat-pill meta-live-pill" title="Data Rank Moonton: {winrateMeta.rank_scope}">
+          <span class="live-dot-mini"></span>
+          <span class="pill-k">DATA META:</span>
+          <span class="pill-v">Update Terakhir: {winrateMeta.last_updated}</span>
+        </div>
         <div class="hud-stat-pill">
           <span class="pill-k">DB:</span>
           <span class="pill-v">133 HEROES</span>
@@ -286,7 +294,10 @@
       <div class="footer-legal">
         <span>MLBB DRAFT & COUNTER ASSISTANT © 2026</span>
         <span class="divider">/</span>
-        <span>OPEN SOURCE TACTICAL TOOL</span>
+        <span class="footer-meta-sync">
+          <span class="sync-dot"></span>
+          <span>Update Terakhir: {winrateMeta.last_updated} ({winrateMeta.rank_scope})</span>
+        </span>
       </div>
       <div class="footer-attribution">
         Basis data resmi didukung oleh
@@ -426,6 +437,25 @@
     font-size: 0.68rem;
   }
 
+  .meta-live-pill {
+    border-color: rgba(56, 189, 248, 0.4);
+    background: rgba(8, 47, 73, 0.4);
+  }
+
+  .live-dot-mini {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #38bdf8;
+    box-shadow: 0 0 8px #38bdf8;
+    animation: livePulse 2s infinite ease-in-out;
+  }
+
+  @keyframes livePulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.85); }
+  }
+
   .pill-k {
     color: var(--text-dim);
     font-weight: 700;
@@ -546,6 +576,23 @@
     display: flex;
     gap: 0.5rem;
     align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .footer-meta-sync {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--gold-mythic);
+    font-weight: 600;
+  }
+
+  .sync-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--gold-mythic);
+    box-shadow: 0 0 6px var(--gold-mythic);
   }
 
   .divider {
