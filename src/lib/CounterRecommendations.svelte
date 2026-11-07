@@ -396,4 +396,53 @@
     max-width: 440px;
     margin: 0 auto;
   }
+
+  @media (max-width: 768px) {
+    .scout-console {
+      padding: 0.65rem 0.75rem;
+    }
+
+    .console-head {
+      padding-bottom: 0.4rem;
+      margin-bottom: 0.65rem;
+      gap: 0.45rem;
+    }
+
+    .head-title {
+      font-size: 0.85rem;
+    }
+
+    .lane-tabs {
+      gap: 0.25rem;
+    }
+
+    .lane-tab {
+      padding: 0.2rem 0.45rem;
+      font-size: 0.62rem;
+    }
+
+    .scout-grid {
+      grid-template-columns: 1fr;
+      gap: 0.6rem;
+    }
+
+    .scout-card {
+      padding: 0.65rem;
+      gap: 0.5rem;
+    }
+
+    .avatar-frame {
+      width: 40px;
+      height: 40px;
+    }
+
+    .hero-name {
+      font-size: 0.85rem;
+    }
+
+    .lock-in-trigger {
+      padding: 0.35rem 0.6rem;
+      font-size: 0.68rem;
+    }
+  }
 </style>

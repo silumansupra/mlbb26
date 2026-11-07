@@ -932,6 +932,25 @@
     gap: 0.6rem;
   }
 
+  .spell-icon-box {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-xs);
+    border: 1.5px solid var(--gold-mythic);
+    overflow: hidden;
+    background: #090e18;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .panel-spell-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
   .spell-title-col {
     display: flex;
     align-items: center;
@@ -979,6 +998,15 @@
     align-items: center;
     gap: 0.4rem;
     flex-wrap: wrap;
+  }
+
+  .alt-spell-mini {
+    width: 22px;
+    height: 22px;
+    border-radius: 3px;
+    object-fit: cover;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    flex-shrink: 0;
   }
 
   .alt-tag {
@@ -1049,6 +1077,14 @@
     border: 1px solid var(--border-tech);
     padding: 0.3rem 0.55rem;
     border-radius: var(--radius-xs);
+  }
+
+  .node-icon-art {
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    object-fit: contain;
+    flex-shrink: 0;
   }
 
   .node-tier {
@@ -1132,6 +1168,25 @@
     font-weight: 800;
     color: var(--text-dim);
     width: 22px;
+  }
+
+  .item-visual-box {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-xs);
+    background: #090e18;
+    border: 1px solid var(--border-tech);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .item-img-art {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 
   .slot-details {
@@ -1546,5 +1601,166 @@
     color: var(--ally-cyan);
     font-family: var(--font-mono);
     font-weight: bold;
+  }
+
+  @media (max-width: 768px) {
+    .loadout-console {
+      padding: 0.75rem;
+      gap: 0.75rem;
+    }
+
+    .console-dossier-bar {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.65rem;
+      padding-bottom: 0.65rem;
+    }
+
+    .dossier-profile {
+      gap: 0.65rem;
+    }
+
+    .dossier-avatar {
+      width: 48px;
+      height: 48px;
+    }
+
+    .dossier-name {
+      font-size: 1.05rem;
+    }
+
+    .header-right-cluster {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .prep-modal-trigger {
+      width: 100%;
+      justify-content: center;
+      padding: 0.45rem 0.75rem;
+      font-size: 0.72rem;
+    }
+
+    .quick-switcher {
+      width: 100%;
+      align-items: stretch;
+    }
+
+    .hero-select-box {
+      width: 100%;
+      font-size: 0.78rem;
+    }
+
+    .meta-dossier-strip {
+      grid-template-columns: repeat(4, 1fr);
+      padding: 0.45rem 0.6rem;
+      gap: 0.35rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .meta-timestamp-item {
+      display: none;
+    }
+
+    .meta-label {
+      font-size: 0.52rem;
+    }
+
+    .meta-val {
+      font-size: 0.82rem;
+    }
+
+    .tier-badge {
+      font-size: 0.62rem;
+      padding: 1px 5px;
+    }
+
+    .sub-cell {
+      padding: 0.75rem;
+    }
+
+    .cell-head {
+      margin-bottom: 0.65rem;
+    }
+
+    .cell-title {
+      font-size: 0.85rem;
+    }
+
+    .spell-banner {
+      gap: 0.5rem;
+    }
+
+    .spell-icon-box {
+      width: 38px;
+      height: 38px;
+    }
+
+    .spell-callsign {
+      font-size: 0.95rem;
+    }
+
+    .inventory-slots {
+      grid-template-columns: 1fr;
+      gap: 0.45rem;
+    }
+
+    .slot-item {
+      padding: 0.5rem 0.65rem;
+      gap: 0.55rem;
+    }
+
+    .item-visual-box {
+      width: 36px;
+      height: 36px;
+    }
+
+    .item-callsign {
+      font-size: 0.82rem;
+    }
+
+    .item-intel {
+      font-size: 0.7rem;
+      line-height: 1.35;
+    }
+
+    .swap-desc {
+      font-size: 0.72rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .swap-triggers-grid {
+      gap: 0.3rem;
+    }
+
+    .trigger-chip {
+      font-size: 0.62rem;
+      padding: 0.22rem 0.45rem;
+    }
+
+    .chip-ic {
+      width: 15px;
+      height: 15px;
+    }
+
+    .duel-profiles-row {
+      padding: 0.5rem 0.65rem;
+    }
+
+    .duel-art {
+      width: 36px;
+      height: 36px;
+    }
+
+    .duel-name {
+      font-size: 0.8rem;
+    }
+
+    .verdict-tag {
+      font-size: 0.68rem;
+      padding: 0.15rem 0.5rem;
+    }
   }
 </style>

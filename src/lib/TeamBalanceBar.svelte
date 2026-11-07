@@ -404,4 +404,39 @@
     color: var(--text-dim);
     letter-spacing: 0.5px;
   }
+
+  @media (max-width: 768px) {
+    .balance-radar {
+      padding: 0.65rem 0.75rem;
+      margin-bottom: 0.85rem;
+    }
+
+    .radar-header {
+      padding-bottom: 0.4rem;
+      margin-bottom: 0.65rem;
+    }
+
+    .radar-title {
+      font-size: 0.82rem;
+    }
+
+    .comp-col {
+      padding: 0.65rem;
+      gap: 0.55rem;
+    }
+
+    .attr-pills-row {
+      gap: 0.3rem;
+    }
+
+    .attr-pill {
+      font-size: 0.58rem;
+      padding: 0.2rem 0.4rem;
+    }
+
+    .warn-chip {
+      padding: 0.3rem 0.45rem;
+      font-size: 0.65rem;
+    }
+  }
 </style>

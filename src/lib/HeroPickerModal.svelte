@@ -585,4 +585,82 @@
     font-size: 0.85rem;
     color: var(--text-muted);
   }
+
+  @media (max-width: 640px) {
+    .modal-scrim {
+      padding: 0.4rem;
+    }
+
+    .modal-dossier {
+      max-height: 94vh;
+      border-radius: var(--radius-sm);
+    }
+
+    .modal-top {
+      padding: 0.75rem 0.85rem;
+    }
+
+    .modal-heading {
+      font-size: 1rem;
+    }
+
+    .modal-sub-tag {
+      font-size: 0.55rem;
+    }
+
+    .modal-meta-sync {
+      font-size: 0.55rem;
+    }
+
+    .dossier-filters {
+      padding: 0.65rem 0.85rem;
+      gap: 0.5rem;
+    }
+
+    .search-terminal {
+      padding: 0.45rem 0.65rem;
+    }
+
+    .role-trigger {
+      font-size: 0.65rem;
+      padding: 0.25rem 0.5rem;
+    }
+
+    .sort-trigger {
+      font-size: 0.58rem;
+      padding: 0.2rem 0.45rem;
+    }
+
+    .arsenal-grid {
+      padding: 0.65rem 0.75rem;
+      grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+      gap: 0.45rem;
+    }
+
+    .arsenal-card {
+      padding: 0.35rem;
+    }
+
+    .card-art-box {
+      width: 48px;
+      height: 48px;
+      margin-bottom: 0.25rem;
+    }
+
+    .card-callsign {
+      font-size: 0.7rem;
+    }
+
+    .card-spec {
+      font-size: 0.55rem;
+    }
+
+    .card-lane-badge {
+      font-size: 0.48rem;
+    }
+
+    .card-wr-corner {
+      font-size: 0.48rem;
+    }
+  }
 </style>

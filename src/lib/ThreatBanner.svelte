@@ -226,4 +226,46 @@
     color: #cbd5e1;
     line-height: 1.4;
   }
+
+  @media (max-width: 768px) {
+    .telemetry-console {
+      padding: 0.65rem 0.75rem;
+      margin-bottom: 0.85rem;
+    }
+
+    .console-head {
+      padding-bottom: 0.4rem;
+      margin-bottom: 0.65rem;
+    }
+
+    .head-title {
+      font-size: 0.85rem;
+    }
+
+    .protocol-code {
+      display: none;
+    }
+
+    .telemetry-grid {
+      grid-template-columns: 1fr;
+      gap: 0.5rem;
+    }
+
+    .hazard-cell {
+      padding: 0.65rem;
+      gap: 0.45rem;
+    }
+
+    .hazard-title {
+      font-size: 0.82rem;
+    }
+
+    .directive-box {
+      padding: 0.45rem 0.6rem;
+    }
+
+    .directive-text {
+      font-size: 0.72rem;
+    }
+  }
 </style>

@@ -764,4 +764,141 @@
     background: var(--enemy-red);
     color: white;
   }
+
+  @media (max-width: 768px) {
+    .draft-arena {
+      gap: 0.65rem;
+      margin-bottom: 0.85rem;
+    }
+
+    .team-stage {
+      padding: 0.65rem;
+      gap: 0.5rem;
+      border-radius: var(--radius-xs);
+    }
+
+    .stage-bar {
+      padding-bottom: 0.4rem;
+    }
+
+    .team-title {
+      font-size: 0.88rem;
+      letter-spacing: 1px;
+    }
+
+    .team-badge {
+      font-size: 0.58rem;
+      padding: 1px 5px;
+    }
+
+    .telemetry-count {
+      font-size: 0.62rem;
+    }
+
+    .cards-deck {
+      gap: 0.25rem;
+    }
+
+    .draft-card {
+      min-height: 110px;
+      border-radius: 4px;
+    }
+
+    .card-lane-strip {
+      min-height: 22px;
+      padding: 2px 3px;
+      gap: 2px;
+    }
+
+    .lane-name {
+      display: none;
+    }
+
+    .lane-code {
+      font-size: 0.55rem;
+    }
+
+    .lane-strip-setup {
+      gap: 2px;
+    }
+
+    .setup-icon-btn {
+      width: 16px;
+      height: 16px;
+      border-radius: 2px;
+    }
+
+    .hero-art-frame {
+      min-height: 52px;
+    }
+
+    .hero-dossier {
+      padding: 2px 3px;
+    }
+
+    .hero-callsign {
+      font-size: 0.68rem;
+      line-height: 1.2;
+    }
+
+    .hero-type {
+      font-size: 0.52rem;
+    }
+
+    .card-wr-tag {
+      font-size: 0.5rem;
+      padding: 0 2px;
+    }
+
+    .eject-btn {
+      width: 18px;
+      height: 18px;
+      font-size: 0.65rem;
+      top: 2px;
+      right: 2px;
+      opacity: 0.9;
+    }
+
+    .placeholder-node {
+      gap: 2px;
+    }
+
+    .reticle-box {
+      width: 22px;
+      height: 22px;
+    }
+
+    .reticle-plus {
+      font-size: 0.8rem;
+    }
+
+    .pick-cue {
+      font-size: 0.52rem;
+    }
+
+    .nexus-column {
+      gap: 0.4rem;
+      padding: 0.2rem 0;
+    }
+
+    .nexus-emblem {
+      display: none;
+    }
+
+    .tactical-actions {
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.35rem;
+      width: 100%;
+    }
+
+    .action-trigger {
+      padding: 0.3rem 0.55rem;
+      font-size: 0.65rem;
+      flex: 1;
+      min-width: 70px;
+      max-width: 140px;
+    }
+  }
 </style>

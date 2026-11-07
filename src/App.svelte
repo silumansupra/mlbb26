@@ -277,6 +277,9 @@
       showToast('Gagal mendownload infografis draft.');
     }
   }
+
+  // Mobile View Tab: 'console' | 'counters' | 'radar'
+  let activeMobileTab = $state('console');
 </script>
 
 <!-- DYNAMIC WALLPAPER VIEWPORT LAYERS -->
@@ -303,10 +306,10 @@
       <div class="header-hud-right">
         <div class="header-quick-actions">
           <button type="button" class="header-action-btn export-btn" onclick={handleExportCard} title="Export Draft Card PNG">
-            <span>📸</span> EXPORT CARD
+            <span>📸</span> <span class="action-btn-text">EXPORT CARD</span>
           </button>
           <button type="button" class="header-action-btn share-btn" onclick={handleShareLink} title="Salin Tautan Draft">
-            <span>🔗</span> SHARE
+            <span>🔗</span> <span class="action-btn-text">SHARE</span>
           </button>
         </div>
 
@@ -318,10 +321,10 @@
         />
         <div class="hud-stat-pill meta-live-pill" title="Data Rank Moonton: {winrateMeta.rank_scope}">
           <span class="live-dot-mini"></span>
-          <span class="pill-k">DATA META:</span>
-          <span class="pill-v">Update Terakhir: {winrateMeta.last_updated}</span>
+          <span class="pill-k">DATA:</span>
+          <span class="pill-v">{winrateMeta.last_updated}</span>
         </div>
-        <div class="hud-stat-pill">
+        <div class="hud-stat-pill desktop-only-pill">
           <span class="pill-k">DB:</span>
           <span class="pill-v">133 HEROES</span>
         </div>
@@ -346,16 +349,53 @@
       onShareLink={handleShareLink}
     />
 
-    <!-- Team Composition & Damage Balance Radar -->
-    <TeamBalanceBar {allyComp} {enemyComp} />
+    <!-- MOBILE CONSOLE TABS (Visible only on screens <= 1080px) -->
+    <div class="mobile-console-tabs" role="tablist">
+      <button
+        type="button"
+        class="mobile-tab"
+        class:is-active={activeMobileTab === 'console'}
+        onclick={() => activeMobileTab = 'console'}
+      >
+        <span class="tab-ic">🛡️</span>
+        <span class="tab-text">HERO LOADOUT</span>
+      </button>
+      <button
+        type="button"
+        class="mobile-tab"
+        class:is-active={activeMobileTab === 'counters'}
+        onclick={() => activeMobileTab = 'counters'}
+      >
+        <span class="tab-ic">⚡</span>
+        <span class="tab-text">COUNTERS</span>
+        {#if counterRecommendations.length > 0}
+          <span class="tab-count-pill">{counterRecommendations.length}</span>
+        {/if}
+      </button>
+      <button
+        type="button"
+        class="mobile-tab"
+        class:is-active={activeMobileTab === 'radar'}
+        onclick={() => activeMobileTab = 'radar'}
+      >
+        <span class="tab-ic">⚠️</span>
+        <span class="tab-text">RADAR & COMP</span>
+        {#if enemyThreats.length > 0}
+          <span class="tab-threat-pill">{enemyThreats.length}</span>
+        {/if}
+      </button>
+    </div>
 
-    <!-- Threat Analysis Radar -->
-    <ThreatBanner threats={enemyThreats} />
+    <!-- RADAR & TEAM BALANCE VIEW -->
+    <div class="radar-comp-section" class:mobile-hidden={activeMobileTab !== 'radar'}>
+      <TeamBalanceBar {allyComp} {enemyComp} />
+      <ThreatBanner threats={enemyThreats} />
+    </div>
 
     <!-- Split Screen: Scouting Report vs Hero Tactical Console -->
     <div class="split-viewport">
       <!-- Left Column: Counter Scouting Recommendations -->
-      <div class="viewport-col">
+      <div class="viewport-col counters-col" class:mobile-hidden={activeMobileTab !== 'counters'}>
         <CounterRecommendations
           recommendations={counterRecommendations}
           onPickToMyTeam={handlePickToMyTeam}
@@ -363,7 +403,7 @@
       </div>
 
       <!-- Right Column: Hero Matchup Console -->
-      <div class="viewport-col">
+      <div class="viewport-col console-col" class:mobile-hidden={activeMobileTab !== 'console'}>
         {#if matchupGuide}
           <HeroDetailPanel
             guide={matchupGuide}
@@ -624,6 +664,75 @@
     flex: 1;
   }
 
+  /* MOBILE CONSOLE TABS */
+  .mobile-console-tabs {
+    display: none;
+    gap: 0.35rem;
+    margin-bottom: 0.85rem;
+    position: sticky;
+    top: 50px;
+    z-index: 90;
+    background: rgba(5, 8, 16, 0.95);
+    backdrop-filter: blur(12px);
+    padding: 0.4rem 0;
+    border-bottom: 1px solid var(--border-tech);
+  }
+
+  .mobile-tab {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    padding: 0.45rem 0.3rem;
+    border-radius: var(--radius-xs);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border-tech);
+    color: var(--text-dim);
+    font-family: var(--font-display);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    transition: all 0.15s ease;
+  }
+
+  .mobile-tab.is-active {
+    background: var(--gold-mythic);
+    color: #05070d;
+    border-color: var(--gold-mythic);
+    box-shadow: 0 0 10px var(--gold-glow);
+  }
+
+  .tab-count-pill, .tab-threat-pill {
+    font-family: var(--font-mono);
+    font-size: 0.58rem;
+    padding: 1px 4px;
+    border-radius: 2px;
+    font-weight: 800;
+  }
+
+  .tab-count-pill {
+    background: rgba(0, 0, 0, 0.5);
+    color: var(--gold-mythic);
+  }
+
+  .tab-threat-pill {
+    background: var(--enemy-red);
+    color: white;
+  }
+
+  .mobile-tab.is-active .tab-count-pill {
+    background: #000000;
+    color: #fef08a;
+  }
+
+  .radar-comp-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+
   .split-viewport {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -632,8 +741,52 @@
   }
 
   @media (max-width: 1080px) {
+    .mobile-console-tabs {
+      display: flex;
+    }
+
+    .mobile-hidden {
+      display: none !important;
+    }
+
+    .main-viewport {
+      padding: 0.65rem 0.5rem;
+    }
+
+    .broadcast-header {
+      padding: 0.45rem 0.75rem;
+    }
+
+    .brand-title {
+      font-size: 0.92rem;
+      letter-spacing: 1px;
+    }
+
+    .brand-telemetry {
+      display: none;
+    }
+
+    .desktop-only-pill {
+      display: none;
+    }
+
+    .action-btn-text {
+      display: none;
+    }
+
+    .header-action-btn {
+      padding: 0.3rem 0.5rem;
+      font-size: 0.75rem;
+    }
+
     .split-viewport {
       grid-template-columns: 1fr;
+      gap: 0.85rem;
+    }
+
+    .radar-comp-section {
+      gap: 0.85rem;
+      margin-bottom: 0.85rem;
     }
   }
 
